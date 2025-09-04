@@ -2,7 +2,7 @@
 - from the Plugin
   - time left
   - mode:
-    - active: normal behaviour, clock ticking
+    - ticking: normal behaviour, clock ticking
     - pause: clock not ticking
     - bypass: clock ticking but no punishment given
 - by permission
@@ -12,7 +12,8 @@
 ```yaml
 groups:
   testgroup: # This name is custom and will lead to a permission `limiter.group.testgroup`
-    strat-timer: 5:00
+    start-timer: 5:00
+    start-mode: ticking
     rules:
       daily: # This rules name is custom and must be unique for this group
         when:
