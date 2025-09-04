@@ -31,6 +31,8 @@ groups:
           time: 7:00
         action:
           restrict: allow
+    on-expiration:
+      command: tellraw "Time's up!"
 ```
 
 #### `action`s:
@@ -43,4 +45,4 @@ groups:
 
 #### `when`s:
 - time
-- online (bool): only when the player is online
+- online (bool): whether the player has to be online
