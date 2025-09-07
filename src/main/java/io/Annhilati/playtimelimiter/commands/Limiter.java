@@ -1,4 +1,4 @@
-package com.Annhilati.playtimeLimiter.Commands;
+package io.annhilati.playtimelimiter.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -11,6 +11,8 @@ public class Limiter implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
+        commandSender.sendMessage("Angekommen");
+
         // Überprüfen, ob der Spieler die benötigte Berechtigung hat
         if (commandSender.hasPermission("limiter.admin")) {
             
@@ -18,11 +20,11 @@ public class Limiter implements CommandExecutor {
 
                 if (args.length >= 2) {
                     
-                    Player player = (Player) commandSender
+                    Player player = (Player) commandSender;
 
                     if (args.length >= 3) {
 
-                        Player player = Bukkit.getPlayer(args[2]);
+                        player = Bukkit.getPlayer(args[2]);
 
                     }
 

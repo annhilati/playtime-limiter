@@ -1,9 +1,8 @@
 name: PlaytimeLimiter
 version: '1.0-SNAPSHOT'
-main: com.Annhilati.playtimeLimiter.PlaytimeLimiter
+main: io.Annhilati.playtimelimiter.PlaytimeLimiter
 api-version: '1.21'
 authors: [ Annhilati ]
-website: https://github.com/annhilati/playtime-limiter
 commands:
   limiter:
 permissions:
