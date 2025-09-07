@@ -13,9 +13,10 @@ public final class PlaytimeLimiter extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        // Config
+        // Config & Data
         saveDefaultConfig();
         createTimerDataFile();
+        new PlaytimeTimer(this);
  
         // Command Registration
         Objects.requireNonNull(getCommand("limiter")).setExecutor(new LimiterCommand());
