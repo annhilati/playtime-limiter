@@ -16,10 +16,10 @@ public final class PlaytimeLimiter extends JavaPlugin {
         // Config & Data
         saveDefaultConfig();
         createTimerDataFile();
-        new PlaytimeTimer(this);
+        playtimeTimer = new PlaytimeTimer(this);
  
         // Command Registration
-        Objects.requireNonNull(getCommand("limiter")).setExecutor(new LimiterCommand());
+        Objects.requireNonNull(getCommand("limiter")).setExecutor(new LimiterCommand(this));
         Objects.requireNonNull(getCommand("limiter")).setTabCompleter(new LimiterCommandCompletion()); 
 
         // Logging
@@ -60,5 +60,13 @@ public final class PlaytimeLimiter extends JavaPlugin {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    // Hilfklassenzugriff
+    private PlaytimeTimer playtimeTimer;
+
+    public PlaytimeTimer getPlayertimeTimer() {
+        return playtimeTimer;
     }
 }

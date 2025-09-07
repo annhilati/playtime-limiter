@@ -1,55 +1,84 @@
 package io.annhilati.playtimelimiter;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 public class LimiterCommand implements CommandExecutor {
+
+    private final PlaytimeLimiter plugin;
+
+    public LimiterCommand(PlaytimeLimiter plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
         commandSender.sendMessage("Angekommen");
 
-        // Überprüfen, ob der Spieler die benötigte Berechtigung hat
-        if (commandSender.hasPermission("limiter.admin")) {
-            
-            if (args.length > 0 && args[0].equalsIgnoreCase("mode")) {
+        FileConfiguration timerData = plugin.getTimerData();
+        
+        // Get UUID
+        UUID uuid = null;
+        if (args.length == 3) {
+            uuid = Bukkit.getPlayer(args[2]).getUniqueId();
+        } else if (commandSender instanceof Player player) {
+            uuid = player.getUniqueId();
+        } else {
+            commandSender.sendMessage("Kann nicht ausgeführt werden");
+            return false;
+        }
 
-                if (args.length >= 2) {
-                    
-                    Player player = (Player) commandSender;
+        // Check Permission
+        if (!commandSender.hasPermission("limiter.admin")) {
+            commandSender.sendMessage("Du hast keine Berechtigung, diesen Befehl auszuführen.");
+            return false;
+        }
 
-                    if (args.length >= 3) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("mode")) {
 
-                        player = Bukkit.getPlayer(args[2]);
+            if (args[1].equalsIgnoreCase("ticking")) {
 
-                    }
+                timerData.set(uuid + ".mode", "ticking");
 
-                    if (args[1].equalsIgnoreCase("ticking")) {
+                if (plugin.getPlayertimeTimer().latestSessionBegins.get(uuid) == null) {
+                    plugin.getPlayertimeTimer().beginSession(uuid);
+                }
 
-                    } else if (args[1].equalsIgnoreCase("pause")) {
-                        
-                    } else if (args[1].equalsIgnoreCase("bypass")) {
-                        
-                    } else {
+            } else if (args[1].equalsIgnoreCase("paused")) {
 
-                        return false;
-                    
-                    }
-                }              
-            
+                timerData.set(uuid + ".mode", "paused");
+                
+                if (plugin.getPlayertimeTimer().latestSessionBegins.get(uuid) != null) {
+                    plugin.getPlayertimeTimer().endSession(uuid);
+                }
+                
+            } else if (args[1].equalsIgnoreCase("bypass")) {
+
+                timerData.set(uuid + ".mode", "bypass");
+                
+                if (plugin.getPlayertimeTimer().latestSessionBegins.get(uuid) == null) {
+                    plugin.getPlayertimeTimer().beginSession(uuid);
+                }
+                
             } else {
 
                 return false;
-            
+                
             }
 
-        } else {
-            // Nachricht, wenn die Berechtigung fehlt
-            commandSender.sendMessage("Du hast keine Berechtigung, diesen Befehl auszuführen.");
+        }
+
+        if (args.length > 0 && args[0].equalsIgnoreCase("settimer")) {
+        
+            timerData.set(uuid + ".time", args[1]);
+
         }
 
         return true;
