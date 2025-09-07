@@ -1,0 +1,23 @@
+default-group: default
+groups:
+  default:
+    start-timer: 5:00
+    start-mode: ticking
+    rules:
+      daily:
+        when:
+          time: 0:00
+        action:
+          change-timer: +5:00
+      night:
+        when:
+          time: 21:00
+        action:
+          restrict: deny
+      morning:
+        when:
+          time: 7:00
+        action:
+          restrict: allow
+    on-expiration:
+      command: tellraw "Time's up!"
