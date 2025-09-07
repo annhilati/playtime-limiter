@@ -1,6 +1,6 @@
 name: PlaytimeLimiter
 version: '1.0-SNAPSHOT'
-main: io.Annhilati.playtimelimiter.PlaytimeLimiter
+main: io.annhilati.playtimelimiter.PlaytimeLimiter
 api-version: '1.21'
 authors: [ Annhilati ]
 commands:
