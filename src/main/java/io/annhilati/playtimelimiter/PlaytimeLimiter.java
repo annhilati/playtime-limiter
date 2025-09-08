@@ -1,22 +1,22 @@
 package io.annhilati.playtimelimiter;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class PlaytimeLimiter extends JavaPlugin {
 
+    private PlaytimeTimer playtimeTimer;
+    
     @Override
     public void onEnable() {
+        
 
         // Config & Data
         saveDefaultConfig();
-        createTimerDataFile();
+        
         playtimeTimer = new PlaytimeTimer(this);
+        playtimeTimer.createTimerDataFile();
  
         // Command Registration
         Objects.requireNonNull(getCommand("limiter")).setExecutor(new LimiterCommand(this));
@@ -38,12 +38,7 @@ public final class PlaytimeLimiter extends JavaPlugin {
         // Plugin shutdown logic
     }
 
-    
-
-
     // Hilfklassenzugriff
-    private PlaytimeTimer playtimeTimer;
-
     public PlaytimeTimer getPlaytimeTimer() {
         return playtimeTimer;
     }

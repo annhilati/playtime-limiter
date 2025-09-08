@@ -22,7 +22,7 @@ public class LimiterCommand implements CommandExecutor {
 
         commandSender.sendMessage("Angekommen");
 
-        FileConfiguration timerData = plugin.getTimerData();
+        FileConfiguration timerData = plugin.getPlaytimeTimer().timerData;
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
         
         // Get UUID
@@ -74,7 +74,7 @@ public class LimiterCommand implements CommandExecutor {
 
         }
 
-        plugin.saveTimerData();
+        playtimeTimer.saveTimerData();
         if (Bukkit.getPlayer(uuid) != null) {
             playtimeTimer.beginTiming(uuid);
         }
