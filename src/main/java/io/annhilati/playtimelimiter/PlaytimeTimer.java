@@ -27,11 +27,9 @@ public class PlaytimeTimer implements Listener {
     public PlaytimeTimer(PlaytimeLimiter plugin) {
         this.plugin = plugin;
 
-        // Scheduler: jede Minute Online-Zeit aktualisieren
         Bukkit.getScheduler().runTaskTimer(plugin, this::updateOnlineTimes, 20L * 5,
                 20L * plugin.getConfig().getInt("update-cycle"));
 
-        // EventListener registrieren
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 

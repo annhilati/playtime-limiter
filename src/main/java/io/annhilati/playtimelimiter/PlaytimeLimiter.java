@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class PlaytimeLimiter extends JavaPlugin {
 
     private PlaytimeTimer playtimeTimer;
+    private GroupRuleManager groupRuleManager;
     
     @Override
     public void onEnable() {
@@ -30,18 +31,18 @@ public final class PlaytimeLimiter extends JavaPlugin {
         }
 
         // Regel-Manager laden
-        GroupRuleManager groupManager = new GroupRuleManager(this);
-        groupManager.parseRulesFromConfig();
-        Bukkit.getScheduler().runTaskTimer(this, groupManager::checkRules, 20L, 20L * 60);
+        groupRuleManager = new GroupRuleManager(this);
+        groupRuleManager.parseRulesFromConfig();
+        Bukkit.getScheduler().runTaskTimer(this, groupRuleManager::checkRules, 20L, 20L * 60);
 
         // Logging
         String pluginName = getPluginMeta().getName();
         String version = getPluginMeta().getVersion();
         String author = String.join(", ", getPluginMeta().getAuthors());
 
-        getLogger().info("=================================");
-        getLogger().info(pluginName + " v" + version + " by " + author + " gestartet!");
-        getLogger().info("=================================");
+        getLogger().info("╭──────────────────────────────────────────────────────────────────────────────────────────╮");
+        getLogger().info("│" + pluginName + " v" + version + " by " + author + " gestartet!");
+        getLogger().info("╰──────────────────────────────────────────────────────────────────────────────────────────╯");
 
     }
 
