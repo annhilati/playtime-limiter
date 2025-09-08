@@ -1,5 +1,7 @@
 package io.annhilati.playtimelimiter;
 
+import io.annhilati.playtimelimiter.Rules.GroupRuleManager;
+
 import java.util.Objects;
 
 import org.bukkit.Bukkit;
@@ -26,6 +28,11 @@ public final class PlaytimeLimiter extends JavaPlugin {
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaytimePlaceholder(this).register();
         }
+
+        // Regel-Manager laden
+        GroupRuleManager groupManager = new GroupRuleManager(this);
+        groupManager.loadRules();
+        Bukkit.getScheduler().runTaskTimer(this, groupManager::checkRules, 20L, 20L * 60);
 
         // Logging
         String pluginName = getPluginMeta().getName();
