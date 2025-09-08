@@ -23,11 +23,12 @@ public class LimiterCommand implements CommandExecutor {
         commandSender.sendMessage("Angekommen");
 
         FileConfiguration timerData = plugin.getTimerData();
+        PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
         
         // Get UUID
         UUID uuid = null;
         if (args.length == 3) {
-            uuid = Bukkit.getPlayer(args[2]).getUniqueId();
+            uuid = Bukkit.getOfflinePlayer(args[2]).getUniqueId();
         } else if (commandSender instanceof Player player) {
             uuid = player.getUniqueId();
         } else {
@@ -41,31 +42,23 @@ public class LimiterCommand implements CommandExecutor {
             return false;
         }
 
+        playtimeTimer.endTiming(uuid);
+
         if (args.length > 0 && args[0].equalsIgnoreCase("mode")) {
 
             if (args[1].equalsIgnoreCase("ticking")) {
 
                 timerData.set(uuid + ".mode", "ticking");
 
-                if (plugin.getPlayertimeTimer().latestSessionBegins.get(uuid) == null) {
-                    plugin.getPlayertimeTimer().beginSession(uuid);
-                }
-
             } else if (args[1].equalsIgnoreCase("paused")) {
 
                 timerData.set(uuid + ".mode", "paused");
                 
-                if (plugin.getPlayertimeTimer().latestSessionBegins.get(uuid) != null) {
-                    plugin.getPlayertimeTimer().endSession(uuid);
-                }
                 
             } else if (args[1].equalsIgnoreCase("bypass")) {
 
                 timerData.set(uuid + ".mode", "bypass");
                 
-                if (plugin.getPlayertimeTimer().latestSessionBegins.get(uuid) == null) {
-                    plugin.getPlayertimeTimer().beginSession(uuid);
-                }
                 
             } else {
 
@@ -77,8 +70,13 @@ public class LimiterCommand implements CommandExecutor {
 
         if (args.length > 0 && args[0].equalsIgnoreCase("settimer")) {
         
-            timerData.set(uuid + ".time", args[1]);
+            timerData.set(uuid + ".time", Long.parseLong(args[1]));
 
+        }
+
+        plugin.saveTimerData();
+        if (Bukkit.getPlayer(uuid) != null) {
+            playtimeTimer.beginTiming(uuid);
         }
 
         return true;

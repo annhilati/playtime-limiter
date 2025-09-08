@@ -38,35 +38,13 @@ public final class PlaytimeLimiter extends JavaPlugin {
         // Plugin shutdown logic
     }
 
-    private FileConfiguration timerData; // Instanzvariable
-    private File timerDataFile; // Datei-Referenz
-
-    private void createTimerDataFile() {
-        timerDataFile = new File(getDataFolder(), "data.yml");
-        if (!timerDataFile.exists()) {
-            timerDataFile.getParentFile().mkdirs(); // Ordner erstellen, falls nötig
-            saveResource("data.yml", false);        // Default-Datei aus Jar kopieren
-        }
-        timerData = YamlConfiguration.loadConfiguration(timerDataFile); // Instanzvariable befüllen
-    }
-
-    public FileConfiguration getTimerData() {
-        return timerData; // Zugriff von außen
-    }
-
-    public void saveTimerData() {
-        try {
-            timerData.save(timerDataFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    
 
 
     // Hilfklassenzugriff
     private PlaytimeTimer playtimeTimer;
 
-    public PlaytimeTimer getPlayertimeTimer() {
+    public PlaytimeTimer getPlaytimeTimer() {
         return playtimeTimer;
     }
 }

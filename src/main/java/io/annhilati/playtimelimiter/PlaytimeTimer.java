@@ -34,28 +34,32 @@ public class PlaytimeTimer implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        beginSession(uuid);
+        beginTiming(uuid);
     }
 
     // Spieler-Logout
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        endSession(uuid);
+        endTiming(uuid);
     }
 
-    public void beginSession(UUID uuid) {
+    public void beginTiming(UUID uuid) {
         Bukkit.broadcast(Component.text("Beginn session " + uuid));
         latestSessionBegins.put(uuid, System.currentTimeMillis());
     }
 
-    public void endSession(UUID uuid) {
-        Bukkit.broadcast(Component.text("End session " + uuid));
-        long latestSessionTime = System.currentTimeMillis() - latestSessionBegins.get(uuid);
-        long alreadyAccumulatedTime = inCycleAccumulatedTimes.getOrDefault(uuid, 0L);
-        inCycleAccumulatedTimes.put(uuid, alreadyAccumulatedTime + latestSessionTime);
+    public void endTiming(UUID uuid) {
+        if (latestSessionBegins.get(uuid) != null) {
 
-        latestSessionBegins.remove(uuid);
+            Bukkit.broadcast(Component.text("End session " + uuid)); // DEBUG
+            long latestSessionDuration = System.currentTimeMillis() - latestSessionBegins.get(uuid);
+            long alreadyAccumulatedTime = inCycleAccumulatedTimes.getOrDefault(uuid, 0L);
+            inCycleAccumulatedTimes.put(uuid, alreadyAccumulatedTime + latestSessionDuration);
+
+            latestSessionBegins.remove(uuid);
+        }
+        
     }
 
     // Minütliche Aktualisierung
@@ -65,7 +69,7 @@ public class PlaytimeTimer implements Listener {
         FileConfiguration timerData = plugin.getTimerData();
         
         for (UUID uuid : latestSessionBegins.keySet()) {
-            endSession(uuid);
+            endTiming(uuid);
         
             // Allerlei Logik mit inCycleAccumulatedTimes
             
@@ -79,7 +83,9 @@ public class PlaytimeTimer implements Listener {
             }
             
             // Zeit aktualisieren
-            timerData.set(uuid + ".time", timerData.getInt(uuid + ".time") - inCycleAccumulatedTimes.get(uuid));
+            if (timerData.getString(uuid + ".mode") != "paused") {
+                timerData.set(uuid + ".time", timerData.getInt(uuid + ".time") - inCycleAccumulatedTimes.get(uuid));
+            }
 
             inCycleAccumulatedTimes.remove(uuid);
             
@@ -96,7 +102,7 @@ public class PlaytimeTimer implements Listener {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             UUID uuid = player.getUniqueId();
-            beginSession(uuid);
+            beginTiming(uuid);
         }
     }
 }
