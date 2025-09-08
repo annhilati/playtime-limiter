@@ -1,6 +1,7 @@
 package io.annhilati.playtimelimiter.Rules;
 
 import io.annhilati.playtimelimiter.PlaytimeLimiter;
+import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class GroupRuleManager {
@@ -21,7 +23,7 @@ public class GroupRuleManager {
         this.plugin = plugin;
     }
 
-    public void loadRules() {
+    public void parseRulesFromConfig() {
 
         FileConfiguration config = plugin.getConfig();
         ConfigurationSection groupsSection = config.getConfigurationSection("groups");
@@ -60,7 +62,10 @@ public class GroupRuleManager {
     }
 
     public void checkRules() {
+        parseRulesFromConfig();
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
+
+        Bukkit.broadcast(Component.text("Rules checking")); // Debug
 
         for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
             
@@ -77,15 +82,23 @@ public class GroupRuleManager {
 
     private void executeRule(String group, GroupRule rule) {
 
+        String permission = "limiter.group." + group;
+
         for (GroupRuleAction action : rule.getActions()) {
 
             switch (action.getType()) {
 
-                case "change-timer":
-                    plugin.getLogger().info("Timer für Gruppe " + group + " ändern: " + action.getValue());
+                case "settimer":
+                    plugin.getLogger().info("Timer für Gruppe " + group + " ändern auf: " + action.getValue());
                     break;
                 case "restrict":
                     plugin.getLogger().info("Restrict für Gruppe " + group + ": " + action.getValue());
+                    break;
+                case "changetimer":
+                    plugin.getLogger().info("Timer für Gruppe " + group + "ändern um: " + action.getValue());
+                    break;
+                case "command":
+                    plugin.getLogger().info("Befehl ausführen: " + action.getValue());
                     break;
                 default:
                     plugin.getLogger().warning("Unbekannte Regel: " + action.getType());

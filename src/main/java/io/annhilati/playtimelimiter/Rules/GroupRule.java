@@ -15,10 +15,7 @@ public class GroupRule {
     }
 
     public String getName() { return name; }
-
     public LocalTime getTime() { return time; }
-
     public List<GroupRuleAction> getActions() { return actions; }
-
 
 }

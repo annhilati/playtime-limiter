@@ -31,7 +31,7 @@ public final class PlaytimeLimiter extends JavaPlugin {
 
         // Regel-Manager laden
         GroupRuleManager groupManager = new GroupRuleManager(this);
-        groupManager.loadRules();
+        groupManager.parseRulesFromConfig();
         Bukkit.getScheduler().runTaskTimer(this, groupManager::checkRules, 20L, 20L * 60);
 
         // Logging

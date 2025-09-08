@@ -9,11 +9,6 @@ public class GroupRuleAction {
         this.value = value;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public String getValue() {
-        return value;
-    }
+    public String getType() { return type; }
+    public String getValue() { return value; }
 }
