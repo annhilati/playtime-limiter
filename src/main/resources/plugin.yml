@@ -8,3 +8,6 @@ commands:
 permissions:
   limiter.admin:
     default: op
+softdepend: [
+  PlaceholderAPI
+]

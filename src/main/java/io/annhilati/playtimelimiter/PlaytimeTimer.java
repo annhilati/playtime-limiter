@@ -59,7 +59,7 @@ public class PlaytimeTimer implements Listener {
             timerData.save(timerDataFile);
         } catch (IOException e) {
             e.printStackTrace();
-                            }
+        }
     }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮

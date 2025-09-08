@@ -2,6 +2,7 @@ package io.annhilati.playtimelimiter;
 
 import java.util.Objects;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class PlaytimeLimiter extends JavaPlugin {
@@ -11,7 +12,6 @@ public final class PlaytimeLimiter extends JavaPlugin {
     @Override
     public void onEnable() {
         
-
         // Config & Data
         saveDefaultConfig();
         
@@ -21,6 +21,11 @@ public final class PlaytimeLimiter extends JavaPlugin {
         // Command Registration
         Objects.requireNonNull(getCommand("limiter")).setExecutor(new LimiterCommand(this));
         Objects.requireNonNull(getCommand("limiter")).setTabCompleter(new LimiterCommandCompletion()); 
+
+        // PlaceholderAPI-Integration
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaytimePlaceholder(this).register();
+        }
 
         // Logging
         String pluginName = getPluginMeta().getName();
