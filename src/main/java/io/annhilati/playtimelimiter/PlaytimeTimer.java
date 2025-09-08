@@ -80,6 +80,8 @@ public class PlaytimeTimer implements Listener {
             
             // Zeit aktualisieren
             timerData.set(uuid + ".time", timerData.getInt(uuid + ".time") - inCycleAccumulatedTimes.get(uuid));
+
+            inCycleAccumulatedTimes.remove(uuid);
             
             // Falls Zeit abgelaufen und kein bypass
             if (timerData.getInt(uuid + ".time") <= 0 && timerData.getString(uuid + ".mode") != "bypass") {
