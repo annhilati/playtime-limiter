@@ -1,0 +1,17 @@
+- [ ] Playtime Timer
+  - [x] Timing Sessions
+  - [ ] Placeholder Expansion
+- [ ] Groups
+  - [x] Default Values
+  - [ ] Assignment by permission
+  - [ ] Rules
+    - [ ] Rule Timing
+    - **Triggers**
+    - [ ] player online
+    - **Actions**
+    - [ ] Command
+    - [ ] Restriction
+    - [ ] Set Timer
+    - [ ] Change Timer
+    - [ ] Kick/Ban
+- [ ] Join Restriction
