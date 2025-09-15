@@ -4,6 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.UUID;
 
 public class PlaytimePlaceholder extends PlaceholderExpansion {
@@ -38,8 +39,13 @@ public class PlaytimePlaceholder extends PlaceholderExpansion {
 
         return switch (identifier.toLowerCase()) {
             case "time" -> {
-                int time = plugin.getPlaytimeTimer().timerData.getInt(uuid + ".time");
-                yield String.valueOf(time);
+                Duration time = Duration.ofMillis(plugin.getPlaytimeTimer().timerData.getInt(uuid + ".time"));
+                long h = time.toHours();
+                long m = time.toMinutesPart();   // seit Java 9
+                long s = time.toSecondsPart();
+                long ms = time.toMillisPart();
+                
+                yield String.format("%02d:%02d", h, m);
             }
             case "mode" -> {
                 String mode = plugin.getPlaytimeTimer().timerData.getString(uuid + ".mode");

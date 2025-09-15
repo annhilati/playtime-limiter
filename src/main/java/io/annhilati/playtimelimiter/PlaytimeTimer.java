@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -63,6 +64,20 @@ public class PlaytimeTimer implements Listener {
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
     // │                                          Timing                                          │
     // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
+
+    @EventHandler
+    public void onPreLogin(AsyncPlayerPreLoginEvent event) {
+        UUID uuid = event.getUniqueId();
+        long time = timerData.getInt(uuid + ".time");
+        
+        if (time < 0) {
+            event.disallow(
+                AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                Component.text("§cZeit abgelaufen!")
+            );
+        }
+        event.allow();
+    }
 
     // Spieler-Login
     @EventHandler
