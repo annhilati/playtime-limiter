@@ -1,11 +1,13 @@
 - [ ] Playtime Timer
   - [x] Timing Sessions
-  - [ ] Placeholder Expansion
+  - [x] Placeholder Expansion
 - [ ] Groups
   - [x] Default Values
   - [ ] Assignment by permission
   - [ ] Rules
     - [ ] Rule Timing
+      - [ ] Outtage Catch-up
+      - [ ] Doubling safety
     - **Triggers**
     - [ ] player online
     - **Actions**
@@ -14,4 +16,4 @@
     - [ ] Set Timer
     - [ ] Change Timer
     - [ ] Kick/Ban
-- [ ] Join Restriction
+- [x] Join Restriction

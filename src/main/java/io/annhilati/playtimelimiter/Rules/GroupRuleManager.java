@@ -61,6 +61,10 @@ public class GroupRuleManager {
         }
     }
 
+    // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
+    // │                                       Check Rules                                        │
+    // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
+
     public void checkRules() {
         parseRulesFromConfig();
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
@@ -70,6 +74,7 @@ public class GroupRuleManager {
         for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
             
             String groupName = group.getKey();
+            Bukkit.broadcast(Component.text(groupName + ": " + group.getValue().size())); // Debug
             
             for (GroupRule rule : group.getValue()) {
                 if (rule.getTime().equals(now)) {
@@ -80,11 +85,17 @@ public class GroupRuleManager {
         }
     }
 
+    // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
+    // │                                        Execute Rule                                      │
+    // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
+
     private void executeRule(String group, GroupRule rule) {
 
         String permission = "limiter.group." + group;
 
         for (GroupRuleAction action : rule.getActions()) {
+
+            Bukkit.broadcast(Component.text(action.getType())); // Debug
 
             switch (action.getType()) {
 

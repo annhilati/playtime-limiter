@@ -1,7 +1,7 @@
 <h1 align="center">PlaytimeLimiter</h1>
 <p align="center">
     <a href="https://annhilati.gitbook.io/vpmobil">
-        <img alt="Static Badge" src="https://img.shields.io/modrinth/dt/P7dR8mSH?style=for-the-badge&logo=modrinth&logoColor=white&label=Downloads&color=23A55A"></a>
+        <img alt="Static Badge" src="https://img.shields.io/modrinth/dt/DcTKDaly?style=for-the-badge&logo=modrinth&logoColor=white&label=Downloads&color=23A55A"></a>
     <br>
     <!--<a href="https://annhilati.gitbook.io/vpmobil">
         <img alt="Static Badge" src="https://img.shields.io/badge/Gitbook-Documentation?style=for-the-badge&logo=gitbook&logoColor=white&label=Dokumentation&color=23A55A"></a>-->

@@ -39,7 +39,7 @@ public class PlaytimePlaceholder extends PlaceholderExpansion {
 
         return switch (identifier.toLowerCase()) {
             case "time" -> {
-                Duration time = Duration.ofMillis(plugin.getPlaytimeTimer().timerData.getInt(uuid + ".time"));
+                Duration time = Duration.ofMillis(plugin.getPlaytimeTimer().playerData.getInt(uuid + ".time"));
                 long h = time.toHours();
                 long m = time.toMinutesPart();   // seit Java 9
                 long s = time.toSecondsPart();
@@ -48,7 +48,7 @@ public class PlaytimePlaceholder extends PlaceholderExpansion {
                 yield String.format("%02d:%02d", h, m);
             }
             case "mode" -> {
-                String mode = plugin.getPlaytimeTimer().timerData.getString(uuid + ".mode");
+                String mode = plugin.getPlaytimeTimer().playerData.getString(uuid + ".mode");
                 yield mode != null ? mode : "unknown";
             }
             default -> null;

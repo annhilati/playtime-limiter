@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class PlaytimeTimer implements Listener {
@@ -38,24 +39,24 @@ public class PlaytimeTimer implements Listener {
     // │                                      Data Storage                                        │ 
     // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
     
-    public FileConfiguration timerData;
-    private File timerDataFile;
+    public FileConfiguration playerData;
+    private File playerDataFile;
                                          
     public void createTimerDataFile() {
-        timerDataFile = new File(plugin.getDataFolder(), "data.yml");
-        if (!timerDataFile.exists()) {
+        playerDataFile = new File(plugin.getDataFolder(), "playtime-data.yml");
+        if (!playerDataFile.exists()) {
                                         
-            timerDataFile.getParentFile().mkdirs(); // Ordner erstellen, falls nötig
+            playerDataFile.getParentFile().mkdirs(); // Ordner erstellen, falls nötig
 
                                         
-            plugin.saveResource("data.yml", false); // Default-Datei aus Jar kopieren }                       
+            plugin.saveResource("playtime-data.yml", false); // Default-Datei aus Jar kopieren }                       
         }
-        timerData = YamlConfiguration.loadConfiguration(timerDataFile); //Instanzvariable befüllen
+        playerData = YamlConfiguration.loadConfiguration(playerDataFile); //Instanzvariable befüllen
     }
 
     public void saveTimerData() {
         try { 
-            timerData.save(timerDataFile);
+            playerData.save(playerDataFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,15 +69,14 @@ public class PlaytimeTimer implements Listener {
     @EventHandler
     public void onPreLogin(AsyncPlayerPreLoginEvent event) {
         UUID uuid = event.getUniqueId();
-        long time = timerData.getInt(uuid + ".time");
+        long time = playerData.getInt(uuid + ".time");
         
-        if (time < 0) {
+        if (time <= 0 && !Objects.equals(playerData.getString(uuid + ".time"), "bypass")) {
             event.disallow(
                 AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
                 Component.text("§cZeit abgelaufen!")
             );
         }
-        event.allow();
     }
 
     // Spieler-Login
@@ -94,12 +94,12 @@ public class PlaytimeTimer implements Listener {
     }
 
     public void beginTiming(UUID uuid) {
-        Bukkit.broadcast(Component.text("Beginn timing " + uuid));
+        plugin.getLogger().info("Beginn timing " + uuid);
         latestSessionBegins.put(uuid, System.currentTimeMillis());
     }
 
     public void endTiming(UUID uuid) {
-        Bukkit.broadcast(Component.text("End timing " + uuid));
+        plugin.getLogger().info("End timing " + uuid);
         Long start = latestSessionBegins.get(uuid);
         if (start == null)
             return; // Null-Safe
@@ -123,27 +123,27 @@ public class PlaytimeTimer implements Listener {
             endTiming(uuid);
 
             // Falls nicht in timerData vorhanden
-            if (!timerData.isSet(uuid.toString() + ".time")) {
+            if (!playerData.isSet(uuid.toString() + ".time")) {
                 String defaultGroup = config.getString("default-group");
 
-                timerData.set(uuid + ".time",
+                playerData.set(uuid + ".time",
                         config.getInt("groups." + defaultGroup + ".start-timer"));
-                timerData.set(uuid + ".mode",
+                playerData.set(uuid + ".mode",
                         config.getString("groups." + defaultGroup + ".start-mode"));
             }
 
             // Zeit abziehen
-            if (timerData.getString(uuid + ".mode") != "paused") {
+            if (!Objects.equals(playerData.getString(uuid + ".mode"), "paused")) {
 
-                int oldTime = timerData.getInt(uuid + ".time");
+                int oldTime = playerData.getInt(uuid + ".time");
                 long latestSessionDuraion = inCycleAccumulatedTimes.getOrDefault(uuid, 0L);
-                timerData.set(uuid + ".time", Math.max(0, oldTime - (int) latestSessionDuraion));
+                playerData.set(uuid + ".time", Math.max(0, oldTime - (int) latestSessionDuraion));
             }
 
             inCycleAccumulatedTimes.remove(uuid);
 
             // Kicken
-            if (timerData.getInt(uuid + ".time") <= 0 && timerData.getString(uuid + ".mode") != "bypass") {
+            if (playerData.getInt(uuid + ".time") <= 0 && !Objects.equals(playerData.getString(uuid + ".mode"), "bypass")) {
 
                 Player player = Bukkit.getPlayer(uuid);
                 if (player != null) {

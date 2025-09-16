@@ -22,7 +22,7 @@ public class LimiterCommand implements CommandExecutor {
 
         commandSender.sendMessage("Angekommen");
 
-        FileConfiguration timerData = plugin.getPlaytimeTimer().timerData;
+        FileConfiguration timerData = plugin.getPlaytimeTimer().playerData;
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
         
         // Get UUID
