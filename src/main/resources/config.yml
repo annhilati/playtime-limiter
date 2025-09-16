@@ -1,5 +1,11 @@
 default-group: default
 update-cycle: 10
+
+# GROUPS
+#
+# Groups are used to apply certain behaviors to specific players.
+# Groups have rule sets, whereby rules in these rule sets basically make changes to the data of the players in the group at certain times.
+# Groups are assigned by a permission 'limiter.group.{groupname}' whereby {groupname} refers to a key in this groups section.
 groups:
   default:
     start-timer: 1000000

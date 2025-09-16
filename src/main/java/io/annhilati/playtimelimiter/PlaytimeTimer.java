@@ -29,10 +29,11 @@ public class PlaytimeTimer implements Listener {
     public PlaytimeTimer(PlaytimeLimiter plugin) {
         this.plugin = plugin;
 
-        Bukkit.getScheduler().runTaskTimer(plugin, this::updateOnlineTimes, 20L * 5,
-                20L * plugin.getConfig().getInt("update-cycle"));
+        createTimerDataFile();
 
-        Bukkit.getPluginManager().registerEvents(this, plugin);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::updateOnlineTimes, 20L * 5, 20L * plugin.getConfig().getInt("update-cycle"));
+
+        Bukkit.getPluginManager().registerEvents(this, plugin); // Für Events, nicht für Scheduling
     }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
@@ -43,13 +44,13 @@ public class PlaytimeTimer implements Listener {
     private File playerDataFile;
                                          
     public void createTimerDataFile() {
-        playerDataFile = new File(plugin.getDataFolder(), "playtime-data.yml");
+        playerDataFile = new File(plugin.getDataFolder(), "player-data.yml");
         if (!playerDataFile.exists()) {
                                         
             playerDataFile.getParentFile().mkdirs(); // Ordner erstellen, falls nötig
 
                                         
-            plugin.saveResource("playtime-data.yml", false); // Default-Datei aus Jar kopieren }                       
+            plugin.saveResource("player-data.yml", false); // Default-Datei aus Jar kopieren }                       
         }
         playerData = YamlConfiguration.loadConfiguration(playerDataFile); //Instanzvariable befüllen
     }
@@ -71,7 +72,7 @@ public class PlaytimeTimer implements Listener {
         UUID uuid = event.getUniqueId();
         long time = playerData.getInt(uuid + ".time");
         
-        if (time <= 0 && !Objects.equals(playerData.getString(uuid + ".time"), "bypass")) {
+        if (time <= 0 && !Objects.equals(playerData.getString(uuid + ".mode"), "bypass")) {
             event.disallow(
                 AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
                 Component.text("§cZeit abgelaufen!")

@@ -19,8 +19,10 @@ public final class PlaytimeLimiter extends JavaPlugin {
         saveDefaultConfig();
         
         playtimeTimer = new PlaytimeTimer(this);
-        playtimeTimer.createTimerDataFile();
  
+        // Regel-Manager laden
+        groupRuleManager = new GroupRuleManager(this);
+
         // Command Registration
         Objects.requireNonNull(getCommand("limiter")).setExecutor(new LimiterCommand(this));
         Objects.requireNonNull(getCommand("limiter")).setTabCompleter(new LimiterCommandCompletion()); 
@@ -30,19 +32,15 @@ public final class PlaytimeLimiter extends JavaPlugin {
             new PlaytimePlaceholder(this).register();
         }
 
-        // Regel-Manager laden
-        groupRuleManager = new GroupRuleManager(this);
-        groupRuleManager.parseRulesFromConfig();
-        Bukkit.getScheduler().runTaskTimer(this, groupRuleManager::checkRules, 20L, 20L * getConfig().getInt("update-cycle"));
 
         // Logging
         String pluginName = getPluginMeta().getName();
         String version = getPluginMeta().getVersion();
         String author = String.join(", ", getPluginMeta().getAuthors());
 
-        getLogger().info("╭──────────────────────────────────────────────────────────────────────────────────────────╮");
-        getLogger().info("│" + pluginName + " v" + version + " by " + author + " gestartet!");
-        getLogger().info("╰──────────────────────────────────────────────────────────────────────────────────────────╯");
+        getLogger().info("╭──────────────────────────────────────────────────────────────────────────────╮");
+        getLogger().info("│ " + pluginName + " v" + version + " by " + author + " gestartet!");
+        getLogger().info("╰──────────────────────────────────────────────────────────────────────────────╯");
 
     }
 

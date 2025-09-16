@@ -6,8 +6,9 @@
   - [ ] Assignment by permission
   - [ ] Rules
     - [ ] Rule Timing
-      - [ ] Outtage Catch-up
       - [ ] Doubling safety
+      - [ ] Outtage Catch-up
+      - [ ] Offline plyer Catch-up
     - **Triggers**
     - [ ] player online
     - **Actions**
