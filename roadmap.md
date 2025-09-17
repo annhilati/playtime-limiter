@@ -18,3 +18,6 @@
     - [ ] Change Timer
     - [ ] Kick/Ban
 - [x] Join Restriction
+
+- cycle on full minutes
+- display seconds based on machine clock
