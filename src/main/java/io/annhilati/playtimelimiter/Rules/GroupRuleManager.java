@@ -1,6 +1,7 @@
 package io.annhilati.playtimelimiter.Rules;
 
 import io.annhilati.playtimelimiter.PlaytimeLimiter;
+import io.annhilati.playtimelimiter.PlaytimeTimer;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
@@ -72,116 +73,122 @@ public class GroupRuleManager {
     // │                                       Check Rules                                        │
     // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
 
+    
     public void checkRules() {
+
         parseRulesFromConfig();
+
         Instant now = Instant.now();
-        LocalTime clockNow = LocalTime.now().withSecond(0).withNano(0);
-
+        LocalTime nowClock = LocalTime.now().withSecond(0).withNano(0);
+        
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
-
+        
         Bukkit.broadcast(Component.text("Rules checking")); // Debug
-
+        
         for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
-
+            String groupName = group.getKey();
+            
             for (Player player : Bukkit.getOnlinePlayers()) {
                 UUID uuid = player.getUniqueId();
 
-                for (GroupRule rule : group.getValue()) {
-                    LocalTime ruleTime = rule.getTime();
-                    Instant lastChekUp = Instant.parse(playerData.getString(uuid + "last-checkup"));
-                    
-                    // 1. Start und Ende in LocalDateTime umwandeln
-                    ZonedDateTime startDateTime = lastChekUp.atZone(ZoneId.systemDefault());
-                    ZonedDateTime endDateTime = now.atZone(ZoneId.systemDefault());
+                if (player.hasPermission("limiter.group." + groupName)); {
 
-                    // 2. Erstes Vorkommen nach Start
-                    LocalDate firstDate = startDateTime.toLocalDate();
-                    ZonedDateTime firstOccurrence = clockNow.atDate(firstDate).atZone(ZoneId.systemDefault());
+                    for (GroupRule rule : group.getValue()) {
 
-                    if (firstOccurrence.isBefore(startDateTime)) {
-                        // Wenn die Zeit am Starttag schon vorbei ist, auf nächsten Tag
-                        firstOccurrence = firstOccurrence.plusDays(1);
+                        Instant lastCheckUp = Instant.parse(playerData.getString(uuid + "last-checkup"));
+                        LocalTime ruleTime = rule.getTime();
+
+                        int occuranceses = countOccurrences(lastCheckUp, now, ruleTime, ZoneId.systemDefault());
+                        
+                        for (int i = 0; i < occuranceses; i++) {
+                            executeRule(rule, uuid);
+                        }
+
                     }
-
-                    // 3. Letztes Vorkommen vor Ende
-                    LocalDate lastDate = endDateTime.toLocalDate();
-                    ZonedDateTime lastOccurrence = clockNow.atDate(lastDate).atZone(ZoneId.systemDefault());
-
-                    if (lastOccurrence.isAfter(endDateTime)) {
-                        // Wenn die Zeit am Endtag noch nicht erreicht ist, einen Tag zurück
-                        lastOccurrence = lastOccurrence.minusDays(1);
-                    }
-
-                    // 4. Anzahl der Tage zwischen erstem und letztem Vorkommen
-                    long daysBetween = Duration.between(firstOccurrence.toLocalDate().atStartOfDay(ZoneId.systemDefault()),
-                                                        lastOccurrence.toLocalDate().atStartOfDay(ZoneId.systemDefault())).toDays();
-
-                    // Wenn negative Zahl, dann keine Vorkommen
-                    int occurences = daysBetween < 0 ? 0 : (int) daysBetween + 1;
-
                 }
-
             }
-            
-            // String groupName = group.getKey();
-            // Bukkit.broadcast(Component.text(groupName + ": " + group.getValue().size())); // Debug
-            
-            // for (GroupRule rule : group.getValue()) {
-            //     if (rule.getTime().equals(now)) {
-            //         executeRule(groupName, rule);
-            //     }
-            // }
         }
+    }
+            
+    public int countOccurrences(Instant from, Instant to, LocalTime time, ZoneId zone) {
+        
+        // 1. Start und Ende in LocalDateTime umwandeln
+        ZonedDateTime startDateTime = from.atZone(zone);
+        ZonedDateTime endDateTime = to.atZone(zone);
+    
+        // 2. Erstes Vorkommen nach Start
+        ZonedDateTime firstOccurrence = time.atDate(startDateTime.toLocalDate()).atZone(zone);
+    
+        if (firstOccurrence.isBefore(startDateTime)) {
+            // Wenn die Zeit am Starttag schon vorbei ist, auf nächsten Tag
+            firstOccurrence = firstOccurrence.plusDays(1);
+        }
+    
+        // 3. Letztes Vorkommen vor Ende
+        ZonedDateTime lastOccurrence = time.atDate(endDateTime.toLocalDate()).atZone(zone);
+    
+        if (lastOccurrence.isAfter(endDateTime)) {
+            // Wenn die Zeit am Endtag noch nicht erreicht ist, einen Tag zurück
+            lastOccurrence = lastOccurrence.minusDays(1);
+        }
+    
+        // 4. Anzahl der Tage zwischen erstem und letztem Vorkommen
+        long daysBetween = Duration.between(firstOccurrence.toLocalDate().atStartOfDay(zone),
+                lastOccurrence.toLocalDate().atStartOfDay(zone)).toDays();
+    
+        // Wenn negative Zahl, dann keine Vorkommen
+        return daysBetween < 0 ? 0 : (int) daysBetween + 1;
     }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
     // │                                        Execute Rule                                      │
     // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
-
-    // private void executeRule(String group, GroupRule rule) {
-
-    //     String permission = "limiter.group." + group;
-    //     FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
-
-    //     for (GroupRuleAction action : rule.getActions()) {
-
-    //         Bukkit.broadcast(Component.text(action.getType())); // Debug
-
-    //         switch (action.getType()) {
-
-    //             case "settimer":
-    //                 plugin.getLogger().info("Timer für Gruppe " + group + " ändern auf: " + action.getValue());
-                    
-    //                 // for (String str : playerData.getKeys(false)) {
-    //                 //     UUID uuid = UUID.fromString(str);
-    //                 //     if Bukkit.getOfflinePlayer(uuid).has
-    //                 // }
-                    
-    //                 break;
-    //             case "restrict":
-    //                 plugin.getLogger().info("Restrict für Gruppe " + group + ": " + action.getValue());
-    //                 break;
-    //             case "changetimer":
-    //                 plugin.getLogger().info("Timer für Gruppe " + group + "ändern um: " + action.getValue());
-    //                 break;
-    //             case "command":
-    //                 plugin.getLogger().info("Befehl ausführen: " + action.getValue());
-    //                 break;
-    //             default:
-    //                 plugin.getLogger().warning("Unbekannte Regel: " + action.getType());
-            
-    //         }
-
-    //     }
+    
+    private void executeRule(GroupRule rule, UUID uuid) {
         
-    // }
+        FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
+        PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
+    
+        for (GroupRuleAction action : rule.getActions()) {
+            String actionType = action.getType();
+            String actionValue = action.getValue();
+        
+            Bukkit.broadcast(Component.text(actionType)); // Debug
+    
+            switch (actionType) {
+        
+                case "settimer":
+                    plugin.getLogger().info("Timer für " + uuid + " ändern auf: " + actionValue);
+    
+                    playtimeTimer.endTiming(uuid);
+                    playerData.set(uuid + ".time", playerData);
+                    playtimeTimer.beginTiming(uuid);
+        
+                    break;
+                case "restrict":
+                    plugin.getLogger().info("Restrict für " + uuid + ": " + actionValue);
+                    break;
+                case "changetimer":
+                    plugin.getLogger().info("Timer für " + uuid + "ändern um: " + actionValue);
+                    break;
+                case "command":
+                    plugin.getLogger().info("Befehl ausführen: " + actionValue);
+                    break;
+                default:
+                    plugin.getLogger().warning("Unbekannte Regel: " + actionValue);
+        
+            }
+        
+        }
+        
+    }
 }
-
-/* 
-@ tastTimer
-for group in groups:
-    for player in onlinePlayers:
-        for rule in rules:
+            
+            /* 
+            @ tastTimer
+            for group in groups:
+            for player in onlinePlayers:
+            for rule in rules:
             if player.lastCheckUp < rule.time < now:
-                rule.execute(player)
- */
+            rule.execute(player)
+            */
