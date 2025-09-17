@@ -1,5 +1,7 @@
 package io.annhilati.playtimelimiter;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -8,6 +10,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 
 public class LimiterCommand implements CommandExecutor {
 
@@ -22,15 +25,15 @@ public class LimiterCommand implements CommandExecutor {
 
         commandSender.sendMessage("Angekommen");
 
-        FileConfiguration timerData = plugin.getPlaytimeTimer().playerData;
+        FileConfiguration config = plugin.getConfig();
+        FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
         
         // Get UUID
         UUID uuid = null;
-        if (args.length == 3) {
-            uuid = Bukkit.getOfflinePlayer(args[2]).getUniqueId();
-        } else if (commandSender instanceof Player player) {
+        if (commandSender instanceof Player player) {
             uuid = player.getUniqueId();
+
         } else {
             commandSender.sendMessage("Kann nicht ausgeführt werden");
             return false;
@@ -44,21 +47,24 @@ public class LimiterCommand implements CommandExecutor {
 
         playtimeTimer.endTiming(uuid);
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("mode")) {
+        if (args.length >= 2 && args[0].equalsIgnoreCase("mode")) {
+
+            if (args.length >= 3) {
+                uuid = Bukkit.getOfflinePlayer(args[2]).getUniqueId();
+            }
 
             if (args[1].equalsIgnoreCase("ticking")) {
 
-                timerData.set(uuid + ".mode", "ticking");
+                playerData.set(uuid + ".mode", "ticking");
 
             } else if (args[1].equalsIgnoreCase("paused")) {
 
-                timerData.set(uuid + ".mode", "paused");
+                playerData.set(uuid + ".mode", "paused");
                 
                 
             } else if (args[1].equalsIgnoreCase("bypass")) {
 
-                timerData.set(uuid + ".mode", "bypass");
-                
+                playerData.set(uuid + ".mode", "bypass");
                 
             } else {
 
@@ -68,9 +74,41 @@ public class LimiterCommand implements CommandExecutor {
 
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("settimer")) {
+        if (args.length >= 2 && args[0].equalsIgnoreCase("settimer")) {
+
+            if (args.length >= 3) {
+                uuid = Bukkit.getOfflinePlayer(args[2]).getUniqueId();
+            }
         
-            timerData.set(uuid + ".time", Long.parseLong(args[1]));
+            playerData.set(uuid + ".time", Long.parseLong(args[1]));
+
+        }
+
+        if (args.length >= 1 && args[0].equalsIgnoreCase("resettimer")) {
+
+            if (args.length >= 3) {
+                uuid = Bukkit.getOfflinePlayer(args[2]).getUniqueId();
+            }
+
+            Set<String> groups = new HashSet<>();
+            long highest = 0;
+
+            for (PermissionAttachmentInfo info : player.getEffectivePermissions()) {
+                if (info.getValue() && info.getPermission().startsWith("limiter.group.")) {
+                    groups.add(info.getPermission());
+
+                    if (config.getLong("groups." + info.getPermission() + ".start-timer") > highest) {
+                        highest = config.getLong("groups." + info.getPermission() + ".start-timer");
+                    }
+                }
+            }
+
+            if (groups.size() == 0) {
+                String defaultGroup = config.getString("default-group");
+                highest = config.getLong("groups." + defaultGroup + ".start-timer");
+            }
+
+            playerData.set(uuid + ".time", highest);
 
         }
 

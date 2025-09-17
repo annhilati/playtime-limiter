@@ -106,6 +106,9 @@ public class GroupRuleManager {
 
                     }
                 }
+
+                playerData.set(uuid + ".last-checkup", now.toString());
+
             }
         }
     }
@@ -183,12 +186,3 @@ public class GroupRuleManager {
         
     }
 }
-            
-            /* 
-            @ tastTimer
-            for group in groups:
-            for player in onlinePlayers:
-            for rule in rules:
-            if player.lastCheckUp < rule.time < now:
-            rule.execute(player)
-            */
