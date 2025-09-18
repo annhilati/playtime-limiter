@@ -7,8 +7,8 @@
   - [ ] Rules
     - [ ] Rule Timing
       - [ ] Doubling safety
-      - [ ] Outtage Catch-up
-      - [ ] Offline plyer Catch-up
+      - [x] Outtage Catch-up
+      - [ ] Offline player Catch-up
     - **Triggers**
     - [ ] player online
     - **Actions**
@@ -19,7 +19,5 @@
     - [ ] Kick/Ban
 - [x] Join Restriction
 
-- cycle on full minutes
-- display seconds based on machine clock
-- new players can join
-- sort defaulting in playerdata
+- kick exactly on 0
+- make parser for settimer/changetimer

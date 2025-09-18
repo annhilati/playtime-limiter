@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -87,18 +88,26 @@ public class GroupRuleManager {
         
         for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
             String groupName = group.getKey();
+            Bukkit.broadcast(Component.text(groupName));
             
             for (Player player : Bukkit.getOnlinePlayers()) {
                 UUID uuid = player.getUniqueId();
+                Bukkit.broadcast(Component.text(player.getName()));
 
                 if (player.hasPermission("limiter.group." + groupName)); {
+                    Bukkit.broadcast(Component.text("Has Perm"));
 
                     for (GroupRule rule : group.getValue()) {
+                        Bukkit.broadcast(Component.text(rule.getName()));
 
-                        Instant lastCheckUp = Instant.parse(playerData.getString(uuid + "last-checkup"));
+                        Instant lastCheckUp = Optional.ofNullable(playerData.getString(uuid + "last-checkup"))
+                            .map(Instant::parse)
+                            .orElse(Instant.now());
                         LocalTime ruleTime = rule.getTime();
 
                         int occuranceses = countOccurrences(lastCheckUp, now, ruleTime, ZoneId.systemDefault());
+
+                        Bukkit.broadcast(Component.text(occuranceses));
                         
                         for (int i = 0; i < occuranceses; i++) {
                             applyRule(rule, uuid);
@@ -113,35 +122,43 @@ public class GroupRuleManager {
             }
         }
     }
-            
+                
     public int countOccurrences(Instant from, Instant to, LocalTime time, ZoneId zone) {
+        // Grundsätzlich dürfte es keine Dopplung geben, da time schon automatisch 0 Sekunden und Millisekunden hat und dadruch als LocalDateTime auch ziemlich exakt ist
         
-        // 1. Start und Ende in LocalDateTime umwandeln
         ZonedDateTime startDateTime = from.atZone(zone);
         ZonedDateTime endDateTime = to.atZone(zone);
     
-        // 2. Erstes Vorkommen nach Start
-        ZonedDateTime firstOccurrence = time.atDate(startDateTime.toLocalDate()).atZone(zone);
-    
-        if (firstOccurrence.isBefore(startDateTime)) {
-            // Wenn die Zeit am Starttag schon vorbei ist, auf nächsten Tag
-            firstOccurrence = firstOccurrence.plusDays(1);
+        ZonedDateTime onStartDayOccurence = time.atDate(startDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
+
+        ZonedDateTime firstOccurrence = null;
+        if (onStartDayOccurence.isBefore(startDateTime)) {
+            firstOccurrence = onStartDayOccurence.plusDays(1);
+        } else {
+            firstOccurrence = onStartDayOccurence;
         }
     
-        // 3. Letztes Vorkommen vor Ende
-        ZonedDateTime lastOccurrence = time.atDate(endDateTime.toLocalDate()).atZone(zone);
-    
-        if (lastOccurrence.isAfter(endDateTime)) {
-            // Wenn die Zeit am Endtag noch nicht erreicht ist, einen Tag zurück
-            lastOccurrence = lastOccurrence.minusDays(1);
+        ZonedDateTime onEndDayOccurence = time.atDate(endDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
+
+        ZonedDateTime lastOccurrence = null;
+        if (onEndDayOccurence.isAfter(endDateTime)) {
+            lastOccurrence = onEndDayOccurence.minusDays(1);
+        } else {
+            lastOccurrence = onEndDayOccurence;
         }
-    
-        // 4. Anzahl der Tage zwischen erstem und letztem Vorkommen
-        long daysBetween = Duration.between(firstOccurrence.toLocalDate().atStartOfDay(zone),
-                lastOccurrence.toLocalDate().atStartOfDay(zone)).toDays();
-    
-        // Wenn negative Zahl, dann keine Vorkommen
-        return daysBetween < 0 ? 0 : (int) daysBetween + 1;
+
+        if (lastOccurrence.isBefore(firstOccurrence)) {
+            return 0;
+        } else if (lastOccurrence.isEqual(firstOccurrence)) {
+            return 1;
+        } else {
+            long daysBetween = Duration.between(firstOccurrence,
+                    lastOccurrence).toDays();
+
+            // Wenn negative Zahl, dann keine Vorkommen
+            return (int) daysBetween + 1;
+        }
+        
     }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
@@ -162,7 +179,7 @@ public class GroupRuleManager {
             switch (actionType) {
         
                 case "settimer":
-                    plugin.getLogger().info("Timer für " + uuid + " ändern auf: " + actionValue);
+                    Bukkit.broadcast(Component.text("Timer für " + uuid + " ändern auf: " + actionValue));
     
                     playtimeTimer.checkOut(uuid);
                     playerData.set(uuid + ".time", playerData);
@@ -170,16 +187,16 @@ public class GroupRuleManager {
         
                     break;
                 case "restrict":
-                    plugin.getLogger().info("Restrict für " + uuid + ": " + actionValue);
+                    Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue));
                     break;
                 case "changetimer":
-                    plugin.getLogger().info("Timer für " + uuid + "ändern um: " + actionValue);
+                    Bukkit.broadcast(Component.text("Timer für " + uuid + "ändern um: " + actionValue));
                     break;
                 case "command":
-                    plugin.getLogger().info("Befehl ausführen: " + actionValue);
+                    Bukkit.broadcast(Component.text("Befehl ausführen: " + actionValue));
                     break;
                 default:
-                    plugin.getLogger().warning("Unbekannte Regel: " + actionValue);
+                    Bukkit.broadcast(Component.text("Unbekannte Regel: " + actionValue));
         
             }
         
