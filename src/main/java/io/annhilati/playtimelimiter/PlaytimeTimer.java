@@ -23,13 +23,13 @@ public class PlaytimeTimer implements Listener {
 
     private final PlaytimeLimiter plugin;
 
-    private final Map<UUID, Long> latestSessionBegins = new HashMap<>();
-    private final Map<UUID, Long> inCycleAccumulatedTimes = new HashMap<>();
+    private final Map<UUID, Long> latestCheckIns = new HashMap<>();
+    private final Map<UUID, Long> afterCheckInAccumulatedDurations = new HashMap<>();
 
     public PlaytimeTimer(PlaytimeLimiter plugin) {
         this.plugin = plugin;
 
-        createTimerDataFile();
+        createPlayerDataDefaultFile();
 
         Bukkit.getScheduler().runTaskTimer(plugin, this::updateOnlineTimes, 20L * 5, 20L * plugin.getConfig().getInt("update-cycle"));
 
@@ -43,19 +43,18 @@ public class PlaytimeTimer implements Listener {
     public FileConfiguration playerData;
     private File playerDataFile;
                                          
-    public void createTimerDataFile() {
+    public void createPlayerDataDefaultFile() {
         playerDataFile = new File(plugin.getDataFolder(), "player-data.yml");
         if (!playerDataFile.exists()) {
                                         
-            playerDataFile.getParentFile().mkdirs(); // Ordner erstellen, falls nötig
-
+            playerDataFile.getParentFile().mkdirs();
                                         
-            plugin.saveResource("player-data.yml", false); // Default-Datei aus Jar kopieren }                       
+            plugin.saveResource("player-data.yml", false);
         }
-        playerData = YamlConfiguration.loadConfiguration(playerDataFile); //Instanzvariable befüllen
+        playerData = YamlConfiguration.loadConfiguration(playerDataFile);
     }
 
-    public void saveTimerData() {
+    public void savePlayerDataToFile() {
         try { 
             playerData.save(playerDataFile);
         } catch (IOException e) {
@@ -84,32 +83,32 @@ public class PlaytimeTimer implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        beginTiming(uuid);
+        checkIn(uuid);
     }
 
     // Spieler-Logout
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        endTiming(uuid);
+        checkOut(uuid);
     }
 
-    public void beginTiming(UUID uuid) {
+    public void checkIn(UUID uuid) {
         plugin.getLogger().info("Beginn timing " + uuid);
-        latestSessionBegins.put(uuid, System.currentTimeMillis());
+        latestCheckIns.put(uuid, System.currentTimeMillis());
     }
 
-    public void endTiming(UUID uuid) {
+    public void checkOut(UUID uuid) {
         plugin.getLogger().info("End timing " + uuid);
-        Long start = latestSessionBegins.get(uuid);
+        Long start = latestCheckIns.get(uuid);
         if (start == null)
             return; // Null-Safe
 
         long duration = System.currentTimeMillis() - start;
-        long accumulated = inCycleAccumulatedTimes.getOrDefault(uuid, 0L);
-        inCycleAccumulatedTimes.put(uuid, accumulated + duration);
+        long accumulated = afterCheckInAccumulatedDurations.getOrDefault(uuid, 0L);
+        afterCheckInAccumulatedDurations.put(uuid, accumulated + duration);
 
-        latestSessionBegins.remove(uuid);
+        latestCheckIns.remove(uuid);
     }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
@@ -120,8 +119,8 @@ public class PlaytimeTimer implements Listener {
 
         FileConfiguration config = plugin.getConfig();
 
-        for (UUID uuid : latestSessionBegins.keySet()) {
-            endTiming(uuid);
+        for (UUID uuid : latestCheckIns.keySet()) {
+            checkOut(uuid);
 
             // Falls nicht in timerData vorhanden
             if (!playerData.isSet(uuid.toString() + ".time")) {
@@ -137,11 +136,11 @@ public class PlaytimeTimer implements Listener {
             if (!Objects.equals(playerData.getString(uuid + ".mode"), "paused")) {
 
                 int oldTime = playerData.getInt(uuid + ".time");
-                long latestSessionDuraion = inCycleAccumulatedTimes.getOrDefault(uuid, 0L);
+                long latestSessionDuraion = afterCheckInAccumulatedDurations.getOrDefault(uuid, 0L);
                 playerData.set(uuid + ".time", Math.max(0, oldTime - (int) latestSessionDuraion));
             }
 
-            inCycleAccumulatedTimes.remove(uuid);
+            afterCheckInAccumulatedDurations.remove(uuid);
 
             // Kicken
             if (playerData.getInt(uuid + ".time") <= 0 && !Objects.equals(playerData.getString(uuid + ".mode"), "bypass")) {
@@ -154,11 +153,11 @@ public class PlaytimeTimer implements Listener {
         }
 
         // Speichern
-        saveTimerData();
+        savePlayerDataToFile();
 
         // Für alle Spieler neue Session starten
         for (Player player : Bukkit.getOnlinePlayers()) {
-            beginTiming(player.getUniqueId());
+            checkIn(player.getUniqueId());
         }
     }
 }

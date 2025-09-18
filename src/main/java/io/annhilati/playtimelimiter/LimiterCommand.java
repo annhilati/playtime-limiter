@@ -34,18 +34,22 @@ public class LimiterCommand implements CommandExecutor {
         if (commandSender instanceof Player player) {
             uuid = player.getUniqueId();
 
-        } else {
-            commandSender.sendMessage("Kann nicht ausgeführt werden");
-            return false;
         }
+        // else {
+        //     commandSender.sendMessage("Kann nicht ausgeführt werden");
+        //     return false;
+        // }
 
-        // Check Permission
+        // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
+        // │                                         Permission                                       │
+        // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
+
         if (!commandSender.hasPermission("limiter.admin")) {
             commandSender.sendMessage("Du hast keine Berechtigung, diesen Befehl auszuführen.");
             return false;
         }
 
-        playtimeTimer.endTiming(uuid);
+        playtimeTimer.checkOut(uuid);
 
         if (args.length >= 2 && args[0].equalsIgnoreCase("mode")) {
 
@@ -93,7 +97,7 @@ public class LimiterCommand implements CommandExecutor {
             Set<String> groups = new HashSet<>();
             long highest = 0;
 
-            for (PermissionAttachmentInfo info : player.getEffectivePermissions()) {
+            for (PermissionAttachmentInfo info : Bukkit.getPlayer(uuid).getEffectivePermissions()) {
                 if (info.getValue() && info.getPermission().startsWith("limiter.group.")) {
                     groups.add(info.getPermission());
 
@@ -103,7 +107,7 @@ public class LimiterCommand implements CommandExecutor {
                 }
             }
 
-            if (groups.size() == 0) {
+            if (groups.isEmpty()) {
                 String defaultGroup = config.getString("default-group");
                 highest = config.getLong("groups." + defaultGroup + ".start-timer");
             }
@@ -112,9 +116,9 @@ public class LimiterCommand implements CommandExecutor {
 
         }
 
-        playtimeTimer.saveTimerData();
+        playtimeTimer.savePlayerDataToFile();
         if (Bukkit.getPlayer(uuid) != null) {
-            playtimeTimer.beginTiming(uuid);
+            playtimeTimer.checkIn(uuid);
         }
 
         return true;

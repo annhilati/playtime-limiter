@@ -21,3 +21,5 @@
 
 - cycle on full minutes
 - display seconds based on machine clock
+- new players can join
+- sort defaulting in playerdata

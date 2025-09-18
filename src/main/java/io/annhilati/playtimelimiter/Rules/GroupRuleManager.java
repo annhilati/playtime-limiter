@@ -163,9 +163,9 @@ public class GroupRuleManager {
                 case "settimer":
                     plugin.getLogger().info("Timer für " + uuid + " ändern auf: " + actionValue);
     
-                    playtimeTimer.endTiming(uuid);
+                    playtimeTimer.checkOut(uuid);
                     playerData.set(uuid + ".time", playerData);
-                    playtimeTimer.beginTiming(uuid);
+                    playtimeTimer.checkIn(uuid);
         
                     break;
                 case "restrict":
