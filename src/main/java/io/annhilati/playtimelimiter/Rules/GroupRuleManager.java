@@ -72,7 +72,6 @@ public class GroupRuleManager {
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
     // │                                       Check Rules                                        │
     // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
-
     
     public void checkRules() {
 
@@ -82,6 +81,7 @@ public class GroupRuleManager {
         LocalTime nowClock = LocalTime.now().withSecond(0).withNano(0);
         
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
+        PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
         
         Bukkit.broadcast(Component.text("Rules checking")); // Debug
         
@@ -101,13 +101,14 @@ public class GroupRuleManager {
                         int occuranceses = countOccurrences(lastCheckUp, now, ruleTime, ZoneId.systemDefault());
                         
                         for (int i = 0; i < occuranceses; i++) {
-                            executeRule(rule, uuid);
+                            applyRule(rule, uuid);
                         }
 
                     }
                 }
 
                 playerData.set(uuid + ".last-checkup", now.toString());
+                playtimeTimer.savePlayerDataToFile();
 
             }
         }
@@ -144,10 +145,10 @@ public class GroupRuleManager {
     }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
-    // │                                        Execute Rule                                      │
+    // │                                        Apply Rule                                        │
     // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
     
-    private void executeRule(GroupRule rule, UUID uuid) {
+    private void applyRule(GroupRule rule, UUID uuid) {
         
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();

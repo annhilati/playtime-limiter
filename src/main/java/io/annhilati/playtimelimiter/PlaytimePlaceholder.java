@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 public class PlaytimePlaceholder extends PlaceholderExpansion {
@@ -37,14 +38,22 @@ public class PlaytimePlaceholder extends PlaceholderExpansion {
             return "";
         UUID uuid = player.getUniqueId();
 
+        PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
+
         return switch (identifier.toLowerCase()) {
             case "time" -> {
-                Duration time = Duration.ofSeconds(plugin.getPlaytimeTimer().playerData.getInt(uuid + ".time"));
-                long h = time.toHoursPart();
-                long m = time.toMinutesPart();   // seit Java 9
-                long s = time.toSecondsPart();
-                
-                yield String.format("%02d:%02d", h, m);
+
+                Duration storedTime = Duration.ofSeconds(playtimeTimer.playerData.getInt(uuid + ".time"));
+                Duration elapsedTime = Duration.between(playtimeTimer.latestCheckIns.get(uuid), Instant.now());
+
+                Duration resultingTime = storedTime.minus(elapsedTime);
+
+                long h = resultingTime.toHoursPart();
+                long m = resultingTime.toMinutesPart();
+                long s = resultingTime.toSecondsPart();
+                                
+                yield String.format("%02d:%02d:%02d", h, m, s);
+
             }
             case "mode" -> {
                 String mode = plugin.getPlaytimeTimer().playerData.getString(uuid + ".mode");

@@ -25,13 +25,12 @@ public class PlaytimeTimer implements Listener {
 
     private final PlaytimeLimiter plugin;
 
-    private final Map<UUID, Instant> latestCheckIns = new HashMap<>();
-    // private final Map<UUID, Long> afterCheckInAccumulatedDurations = new HashMap<>();
+    public final Map<UUID, Instant> latestCheckIns = new HashMap<>();
 
     public PlaytimeTimer(PlaytimeLimiter plugin) {
         this.plugin = plugin;
 
-        createPlayerDataDefaultFile();
+        createPlayerDataFileDefault();
 
         Bukkit.getScheduler().runTaskTimer(plugin, this::updateOnlineTimes, 20L * 5, 20L * plugin.getConfig().getInt("update-cycle"));
 
@@ -45,7 +44,7 @@ public class PlaytimeTimer implements Listener {
     public FileConfiguration playerData;
     private File playerDataFile;
                                          
-    public void createPlayerDataDefaultFile() {
+    public void createPlayerDataFileDefault() {
         playerDataFile = new File(plugin.getDataFolder(), "player-data.yml");
         if (!playerDataFile.exists()) {
                                         
@@ -133,6 +132,7 @@ public class PlaytimeTimer implements Listener {
         }
 
         latestCheckIns.remove(uuid);
+        savePlayerDataToFile();
 
     }
 
