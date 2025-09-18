@@ -14,6 +14,8 @@ import net.kyori.adventure.text.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,8 +25,8 @@ public class PlaytimeTimer implements Listener {
 
     private final PlaytimeLimiter plugin;
 
-    private final Map<UUID, Long> latestCheckIns = new HashMap<>();
-    private final Map<UUID, Long> afterCheckInAccumulatedDurations = new HashMap<>();
+    private final Map<UUID, Instant> latestCheckIns = new HashMap<>();
+    // private final Map<UUID, Long> afterCheckInAccumulatedDurations = new HashMap<>();
 
     public PlaytimeTimer(PlaytimeLimiter plugin) {
         this.plugin = plugin;
@@ -69,7 +71,18 @@ public class PlaytimeTimer implements Listener {
     @EventHandler
     public void onPreLogin(AsyncPlayerPreLoginEvent event) {
         UUID uuid = event.getUniqueId();
+        FileConfiguration config = plugin.getConfig();
+
+        // Falls nicht in timerData vorhanden
+        if (!playerData.isSet(uuid.toString())) {
+            String defaultGroup = config.getString("default-group");
+
+            playerData.set(uuid + ".time", config.getInt("groups." + defaultGroup + ".start-timer"));
+            playerData.set(uuid + ".mode", config.getString("groups." + defaultGroup + ".start-mode"));
+        }
+
         long time = playerData.getInt(uuid + ".time");
+        String mode = playerData.getString(uuid + ".mode");
         
         if (time <= 0 && !Objects.equals(playerData.getString(uuid + ".mode"), "bypass")) {
             event.disallow(
@@ -94,70 +107,42 @@ public class PlaytimeTimer implements Listener {
     }
 
     public void checkIn(UUID uuid) {
-        plugin.getLogger().info("Beginn timing " + uuid);
-        latestCheckIns.put(uuid, System.currentTimeMillis());
+        plugin.getLogger().info("Check in " + uuid);
+        latestCheckIns.put(uuid, Instant.now());
     }
 
     public void checkOut(UUID uuid) {
-        plugin.getLogger().info("End timing " + uuid);
-        Long start = latestCheckIns.get(uuid);
-        if (start == null)
+        plugin.getLogger().info("Check out " + uuid);
+        Instant checkIn = latestCheckIns.get(uuid);
+        if (checkIn == null)
             return; // Null-Safe
 
-        long duration = System.currentTimeMillis() - start;
-        long accumulated = afterCheckInAccumulatedDurations.getOrDefault(uuid, 0L);
-        afterCheckInAccumulatedDurations.put(uuid, accumulated + duration);
+        Duration duration = Duration.between(checkIn, Instant.now());
+
+        // Zeit abziehen
+        if (!Objects.equals(playerData.getString(uuid + ".mode"), "paused")) {
+
+            int oldTime = playerData.getInt(uuid + ".time");
+            playerData.set(uuid + ".time", Math.max(0, oldTime - duration.getSeconds()));
+        }
+
+        // Kicken
+        if (playerData.getInt(uuid + ".time") <= 0 && !Objects.equals(playerData.getString(uuid + ".mode"), "bypass")) {
+
+            Bukkit.getPlayer(uuid).kick(Component.text("§cZeit abgelaufen!"));
+        }
 
         latestCheckIns.remove(uuid);
-    }
 
-    // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
-    // │                                     Time Adjustment                                      │
-    // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
+    }
 
     private void updateOnlineTimes() {
 
-        FileConfiguration config = plugin.getConfig();
-
-        for (UUID uuid : latestCheckIns.keySet()) {
-            checkOut(uuid);
-
-            // Falls nicht in timerData vorhanden
-            if (!playerData.isSet(uuid.toString() + ".time")) {
-                String defaultGroup = config.getString("default-group");
-
-                playerData.set(uuid + ".time",
-                        config.getInt("groups." + defaultGroup + ".start-timer"));
-                playerData.set(uuid + ".mode",
-                        config.getString("groups." + defaultGroup + ".start-mode"));
-            }
-
-            // Zeit abziehen
-            if (!Objects.equals(playerData.getString(uuid + ".mode"), "paused")) {
-
-                int oldTime = playerData.getInt(uuid + ".time");
-                long latestSessionDuraion = afterCheckInAccumulatedDurations.getOrDefault(uuid, 0L);
-                playerData.set(uuid + ".time", Math.max(0, oldTime - (int) latestSessionDuraion));
-            }
-
-            afterCheckInAccumulatedDurations.remove(uuid);
-
-            // Kicken
-            if (playerData.getInt(uuid + ".time") <= 0 && !Objects.equals(playerData.getString(uuid + ".mode"), "bypass")) {
-
-                Player player = Bukkit.getPlayer(uuid);
-                if (player != null) {
-                    player.kick(Component.text("§cZeit abgelaufen!"));
-                }
-            }
-        }
-
-        // Speichern
-        savePlayerDataToFile();
-
-        // Für alle Spieler neue Session starten
         for (Player player : Bukkit.getOnlinePlayers()) {
-            checkIn(player.getUniqueId());
+            UUID uuid = player.getUniqueId();
+            checkOut(uuid);
+            checkIn(uuid);
         }
+
     }
 }
