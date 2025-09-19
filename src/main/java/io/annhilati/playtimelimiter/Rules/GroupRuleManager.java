@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -100,18 +99,20 @@ public class GroupRuleManager {
                     for (GroupRule rule : group.getValue()) {
                         Bukkit.broadcast(Component.text(rule.getName()));
 
-                        Instant lastCheckUp = Optional.ofNullable(playerData.getString(uuid + "last-checkup"))
-                            .map(Instant::parse)
-                            .orElse(Instant.now());
+
+                        Instant lastCheckUp = Instant.parse(playerData.getString(uuid + ".last-checkup"));
                         LocalTime ruleTime = rule.getTime();
 
-                        int occuranceses = countOccurrences(lastCheckUp, now, ruleTime, ZoneId.systemDefault());
+                        Bukkit.broadcast(Component.text(lastCheckUp.toString()));
+                        Bukkit.broadcast(Component.text(now.toString()));
+                        long occuranceses = countOccurrences(lastCheckUp, now, ruleTime);
 
                         Bukkit.broadcast(Component.text(occuranceses));
                         
                         for (int i = 0; i < occuranceses; i++) {
                             applyRule(rule, uuid);
                         }
+                        
 
                     }
                 }
@@ -123,12 +124,13 @@ public class GroupRuleManager {
         }
     }
                 
-    public int countOccurrences(Instant from, Instant to, LocalTime time, ZoneId zone) {
+    public int countOccurrences(Instant from, Instant to, LocalTime time) {
         // Grundsätzlich dürfte es keine Dopplung geben, da time schon automatisch 0 Sekunden und Millisekunden hat und dadruch als LocalDateTime auch ziemlich exakt ist
-        
+     
+        ZoneId zone = ZoneId.systemDefault();
         ZonedDateTime startDateTime = from.atZone(zone);
         ZonedDateTime endDateTime = to.atZone(zone);
-    
+
         ZonedDateTime onStartDayOccurence = time.atDate(startDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
 
         ZonedDateTime firstOccurrence = null;
@@ -137,7 +139,7 @@ public class GroupRuleManager {
         } else {
             firstOccurrence = onStartDayOccurence;
         }
-    
+
         ZonedDateTime onEndDayOccurence = time.atDate(endDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
 
         ZonedDateTime lastOccurrence = null;
@@ -146,6 +148,9 @@ public class GroupRuleManager {
         } else {
             lastOccurrence = onEndDayOccurence;
         }
+
+        Bukkit.broadcast(Component.text(firstOccurrence.toString()));
+        Bukkit.broadcast(Component.text(lastOccurrence.toString()));
 
         if (lastOccurrence.isBefore(firstOccurrence)) {
             return 0;
@@ -158,7 +163,7 @@ public class GroupRuleManager {
             // Wenn negative Zahl, dann keine Vorkommen
             return (int) daysBetween + 1;
         }
-        
+     
     }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
