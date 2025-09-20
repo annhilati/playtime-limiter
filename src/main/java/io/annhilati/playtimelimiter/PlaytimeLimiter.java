@@ -53,4 +53,7 @@ public final class PlaytimeLimiter extends JavaPlugin {
     public PlaytimeTimer getPlaytimeTimer() {
         return playtimeTimer;
     }
+    public GroupRuleManager getGroupRuleManager() {
+        return groupRuleManager;
+    }
 }

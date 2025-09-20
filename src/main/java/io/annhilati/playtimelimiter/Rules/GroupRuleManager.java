@@ -72,55 +72,63 @@ public class GroupRuleManager {
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
     // │                                       Check Rules                                        │
     // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
+
+    public void checkRulesFor(UUID uuid) {
+
+        Instant now = Instant.now();
+        LocalTime nowClock = LocalTime.now().withSecond(0).withNano(0);
+
+        FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
+        PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
+
+        Player player = Bukkit.getPlayer(uuid);
+        Bukkit.broadcast(Component.text(player.getName()));
+
+        for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
+            String groupName = group.getKey();
+            Bukkit.broadcast(Component.text(groupName));
+
+            if (player.hasPermission("limiter.group." + groupName)) {
+
+                Bukkit.broadcast(Component.text("Has Perm"));
+
+                for (GroupRule rule : group.getValue()) {
+                    Bukkit.broadcast(Component.text(rule.getName()));
+
+                    Instant lastCheckUp = Instant.parse(playerData.getString(uuid + ".last-checkup"));
+                    LocalTime ruleTime = rule.getTime();
+
+                    Bukkit.broadcast(Component.text(lastCheckUp.toString()));
+                    Bukkit.broadcast(Component.text(now.toString()));
+                    long occuranceses = countOccurrences(lastCheckUp, now, ruleTime);
+
+                    Bukkit.broadcast(Component.text(occuranceses));
+
+                    for (int i = 0; i < occuranceses; i++) {
+                        applyRule(rule, uuid);
+                    }
+
+                }
+            }
+
+            playerData.set(uuid + ".last-checkup", now.toString());
+            playtimeTimer.savePlayerDataToFile();
+
+        }
+
+    }
     
     public void checkRules() {
 
         parseRulesFromConfig();
-
-        Instant now = Instant.now();
-        LocalTime nowClock = LocalTime.now().withSecond(0).withNano(0);
-        
-        FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
-        PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
         
         Bukkit.broadcast(Component.text("Rules checking")); // Debug
         
-        for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
-            String groupName = group.getKey();
-            Bukkit.broadcast(Component.text(groupName));
-            
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                UUID uuid = player.getUniqueId();
-                Bukkit.broadcast(Component.text(player.getName()));
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            UUID uuid = player.getUniqueId();
 
-                if (player.hasPermission("limiter.group." + groupName)); {
-                    Bukkit.broadcast(Component.text("Has Perm"));
+            checkRulesFor(uuid);
 
-                    for (GroupRule rule : group.getValue()) {
-                        Bukkit.broadcast(Component.text(rule.getName()));
-
-
-                        Instant lastCheckUp = Instant.parse(playerData.getString(uuid + ".last-checkup"));
-                        LocalTime ruleTime = rule.getTime();
-
-                        Bukkit.broadcast(Component.text(lastCheckUp.toString()));
-                        Bukkit.broadcast(Component.text(now.toString()));
-                        long occuranceses = countOccurrences(lastCheckUp, now, ruleTime);
-
-                        Bukkit.broadcast(Component.text(occuranceses));
-                        
-                        for (int i = 0; i < occuranceses; i++) {
-                            applyRule(rule, uuid);
-                        }
-                        
-
-                    }
-                }
-
-                playerData.set(uuid + ".last-checkup", now.toString());
-                playtimeTimer.savePlayerDataToFile();
-
-            }
         }
     }
                 
@@ -163,7 +171,6 @@ public class GroupRuleManager {
             // Wenn negative Zahl, dann keine Vorkommen
             return (int) daysBetween + 1;
         }
-     
     }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
@@ -186,16 +193,18 @@ public class GroupRuleManager {
                 case "settimer":
                     Bukkit.broadcast(Component.text("Timer für " + uuid + " ändern auf: " + actionValue));
     
-                    playtimeTimer.checkOut(uuid);
-                    playerData.set(uuid + ".time", playerData);
-                    playtimeTimer.checkIn(uuid);
+                    // playtimeTimer.checkOut(uuid);
+                    // playerData.set(uuid + ".time", );
+                    // playtimeTimer.checkIn(uuid);
         
-                    break;
-                case "restrict":
-                    Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue));
-                    break;
                 case "changetimer":
                     Bukkit.broadcast(Component.text("Timer für " + uuid + "ändern um: " + actionValue));
+                    
+                    // playtimeTimer.checkOut(uuid);
+                    // playerData.set(uuid + ".time", playerData);
+
+                case "restrict":
+                    Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue));
                     break;
                 case "command":
                     Bukkit.broadcast(Component.text("Befehl ausführen: " + actionValue));

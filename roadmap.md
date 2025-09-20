@@ -3,12 +3,12 @@
   - [x] Placeholder Expansion
 - [ ] Groups
   - [x] Default Values
-  - [ ] Assignment by permission
+  - [x] Assignment by permission
   - [ ] Rules
-    - [ ] Rule Timing
-      - [ ] Doubling safety
+    - [x] Rule Timing
+      - [x] Doubling safety
       - [x] Outtage Catch-up
-      - [ ] Offline player Catch-up
+      - [x] Offline player Catch-up
     - **Triggers**
     - [ ] player online
     - **Actions**
@@ -21,3 +21,4 @@
 
 - kick exactly on 0
 - make parser for settimer/changetimer
+- check if new time on join

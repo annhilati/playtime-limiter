@@ -80,6 +80,8 @@ public class PlaytimeTimer implements Listener {
             playerData.set(uuid + ".mode", config.getString("groups." + defaultGroup + ".start-mode"));
         }
 
+        plugin.getGroupRuleManager().checkRulesFor(uuid);
+
         long time = playerData.getInt(uuid + ".time");
         String mode = playerData.getString(uuid + ".mode");
         
