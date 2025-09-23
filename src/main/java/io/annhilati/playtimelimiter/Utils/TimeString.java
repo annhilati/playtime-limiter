@@ -8,7 +8,7 @@ public class TimeString {
     
     public Duration DurationFromString(String string) {
 
-        String regex = "(\\d+d)?(\\d+h)?(\\d+m)?";
+        String regex = "(\\d+d)?(\\d+h)?(\\d+m)?(\\\\d+s)?";
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(string);
