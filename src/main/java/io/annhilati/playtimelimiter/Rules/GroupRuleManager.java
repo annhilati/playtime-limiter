@@ -76,7 +76,6 @@ public class GroupRuleManager {
     public void checkRulesFor(UUID uuid) {
 
         Instant now = Instant.now();
-        LocalTime nowClock = LocalTime.now().withSecond(0).withNano(0);
 
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
@@ -179,8 +178,8 @@ public class GroupRuleManager {
     
     private void applyRule(GroupRule rule, UUID uuid) {
         
-        FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
+        FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
     
         for (GroupRuleAction action : rule.getActions()) {
             String actionType = action.getType();
@@ -193,15 +192,26 @@ public class GroupRuleManager {
                 case "settimer":
                     Bukkit.broadcast(Component.text("Timer für " + uuid + " ändern auf: " + actionValue));
     
-                    // playtimeTimer.checkOut(uuid);
-                    // playerData.set(uuid + ".time", );
-                    // playtimeTimer.checkIn(uuid);
+                    if (playtimeTimer.hasSession(uuid)) {
+                        playtimeTimer.checkOut(uuid);
+                        playerData.set(uuid + ".time", Long.parseLong(actionValue));
+                        playtimeTimer.checkIn(uuid);
+                    } else {
+                        playerData.set(uuid + ".time", Long.parseLong(actionValue));
+                    }
         
                 case "changetimer":
                     Bukkit.broadcast(Component.text("Timer für " + uuid + "ändern um: " + actionValue));
+
+                    Long oldTime = playerData.getLong(uuid + ".time");
                     
-                    // playtimeTimer.checkOut(uuid);
-                    // playerData.set(uuid + ".time", playerData);
+                    if (playtimeTimer.hasSession(uuid)) {
+                        playtimeTimer.checkOut(uuid);
+                        playerData.set(uuid + ".time", oldTime + Long.parseLong(actionValue));
+                        playtimeTimer.checkIn(uuid);
+                    } else {
+                        playerData.set(uuid + ".time", oldTime + Long.parseLong(actionValue));
+                    }
 
                 case "restrict":
                     Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue));

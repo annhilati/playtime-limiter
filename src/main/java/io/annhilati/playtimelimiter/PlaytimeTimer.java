@@ -78,17 +78,25 @@ public class PlaytimeTimer implements Listener {
 
             playerData.set(uuid + ".time", config.getInt("groups." + defaultGroup + ".start-timer"));
             playerData.set(uuid + ".mode", config.getString("groups." + defaultGroup + ".start-mode"));
+            playerData.set(uuid + ".restrict", false);
         }
 
         plugin.getGroupRuleManager().checkRulesFor(uuid);
 
         long time = playerData.getInt(uuid + ".time");
         String mode = playerData.getString(uuid + ".mode");
+        boolean restrict = playerData.getBoolean(uuid + ".restrict");
         
-        if (time <= 0 && !Objects.equals(playerData.getString(uuid + ".mode"), "bypass")) {
+        if (time <= 0 && mode == "bypass") {
             event.disallow(
                 AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
                 Component.text("§cZeit abgelaufen!")
+            );
+        }
+        if (restrict == true) {
+             event.disallow(
+                AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                Component.text("§cNicht erlaubt (Restricted)!")
             );
         }
     }
@@ -105,6 +113,13 @@ public class PlaytimeTimer implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         checkOut(uuid);
+    }
+
+    public boolean hasSession(UUID uuid) {
+        if (latestCheckIns.containsKey(uuid)) {
+            return true;
+        }
+        return false;
     }
 
     public void checkIn(UUID uuid) {
