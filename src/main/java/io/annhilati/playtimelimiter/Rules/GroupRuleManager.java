@@ -215,7 +215,8 @@ public class GroupRuleManager {
 
                 case "restrict":
                     Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue));
-                    break;
+                    playerData.set(uuid + ".restrict", bool(actionValue))
+                    player kicken, falls er online und restrict true ist
                 case "command":
                     Bukkit.broadcast(Component.text("Befehl ausführen: " + actionValue));
                     break;
