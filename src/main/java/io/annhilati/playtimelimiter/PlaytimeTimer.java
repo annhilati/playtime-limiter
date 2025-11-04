@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import net.kyori.adventure.text.Component;
 
@@ -16,10 +17,13 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PlaytimeTimer implements Listener {
 
@@ -72,7 +76,7 @@ public class PlaytimeTimer implements Listener {
         UUID uuid = event.getUniqueId();
         FileConfiguration config = plugin.getConfig();
 
-        Bukkit.broadcast(Component.text(Bukkit.getPlayer(uuid).getName() + " wants to join"));
+        Bukkit.broadcast(Component.text(event.getName() + " wants to join"));
 
         // Falls nicht in timerData vorhanden
         if (!playerData.isSet(uuid.toString())) {
@@ -81,6 +85,7 @@ public class PlaytimeTimer implements Listener {
             playerData.set(uuid + ".time", config.getInt("groups." + defaultGroup + ".start-timer"));
             playerData.set(uuid + ".mode", config.getString("groups." + defaultGroup + ".start-mode"));
             playerData.set(uuid + ".restrict", false);
+            playerData.set(uuid + ".groups", Arrays.asList(defaultGroup));
         }
 
         plugin.getGroupRuleManager().checkRulesFor(uuid);
@@ -159,9 +164,23 @@ public class PlaytimeTimer implements Listener {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             UUID uuid = player.getUniqueId();
+            updatePlayerGroups(player);
             checkOut(uuid);
             checkIn(uuid);
         }
 
+    }
+
+    private void updatePlayerGroups(Player player) {
+        FileConfiguration config = plugin.getConfig();
+
+        List<String> permittedGroups = player.getEffectivePermissions().stream().filter(info -> info.getPermission().startsWith("limiter.group.")).filter(PermissionAttachmentInfo::getValue).map(info -> info.getPermission().substring("limiter.group.".length())).collect(Collectors.toList());
+        if (permittedGroups.size() == 0) {
+            Bukkit.broadcast(Component.text("Liste ist 0 " + config.getString("default-group")));
+            playerData.set(player.getUniqueId() + ".groups", Arrays.asList(config.getString("default-group")));
+            savePlayerDataToFile();
+            return;
+        }
+        playerData.set(player.getUniqueId() + ".groups", permittedGroups);
     }
 }

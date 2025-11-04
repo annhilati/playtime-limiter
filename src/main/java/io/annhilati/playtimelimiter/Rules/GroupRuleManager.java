@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import org.bukkit.entity.Player;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class GroupRuleManager {
@@ -73,6 +74,9 @@ public class GroupRuleManager {
     // │                                       Check Rules                                        │
     // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
 
+    /**
+     * UUID muss einem online Player gehören
+     */
     public void checkRulesFor(UUID uuid) {
 
         Instant now = Instant.now();
@@ -80,14 +84,14 @@ public class GroupRuleManager {
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
 
-        Player player = Bukkit.getPlayer(uuid);
+        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
         Bukkit.broadcast(Component.text("Checking rules for " + player.getName())); // DEBUG
 
         for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
             String groupName = group.getKey();
             Bukkit.broadcast(Component.text("Checking for group " + groupName));
 
-            if (player.hasPermission("limiter.group." + groupName)) {
+            if (playerData.getString(uuid + ".groups").contains(groupName)) {
 
                 Bukkit.broadcast(Component.text(player.getName() + " has Perm for " + groupName));
 
