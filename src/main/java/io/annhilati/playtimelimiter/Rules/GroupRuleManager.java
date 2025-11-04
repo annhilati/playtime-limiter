@@ -81,18 +81,18 @@ public class GroupRuleManager {
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
 
         Player player = Bukkit.getPlayer(uuid);
-        Bukkit.broadcast(Component.text(player.getName()));
+        Bukkit.broadcast(Component.text("Checking rules for " + player.getName())); // DEBUG
 
         for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
             String groupName = group.getKey();
-            Bukkit.broadcast(Component.text(groupName));
+            Bukkit.broadcast(Component.text("Checking for group " + groupName));
 
             if (player.hasPermission("limiter.group." + groupName)) {
 
-                Bukkit.broadcast(Component.text("Has Perm"));
+                Bukkit.broadcast(Component.text(player.getName() + " has Perm for " + groupName));
 
                 for (GroupRule rule : group.getValue()) {
-                    Bukkit.broadcast(Component.text(rule.getName()));
+                    Bukkit.broadcast(Component.text("Checking rule " + rule.getName()));
 
                     Instant lastCheckUp = Instant.parse(playerData.getString(uuid + ".last-checkup"));
                     LocalTime ruleTime = rule.getTime();
@@ -101,7 +101,7 @@ public class GroupRuleManager {
                     Bukkit.broadcast(Component.text(now.toString()));
                     long occuranceses = countOccurrences(lastCheckUp, now, ruleTime);
 
-                    Bukkit.broadcast(Component.text(occuranceses));
+                    Bukkit.broadcast(Component.text("Occurances: " + occuranceses));
 
                     for (int i = 0; i < occuranceses; i++) {
                         applyRule(rule, uuid);
@@ -180,6 +180,8 @@ public class GroupRuleManager {
         
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
+
+        Player player = Bukkit.getPlayer(uuid);
     
         for (GroupRuleAction action : rule.getActions()) {
             String actionType = action.getType();
@@ -215,11 +217,15 @@ public class GroupRuleManager {
 
                 case "restrict":
                     Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue));
-                    playerData.set(uuid + ".restrict", bool(actionValue))
-                    player kicken, falls er online und restrict true ist
+                    playerData.set(uuid + ".restrict", Boolean.parseBoolean(actionValue));
+                    if (player != null && Boolean.parseBoolean(actionValue) == true) {
+                        player.kick(Component.text("Restriced"));
+                    }
+
                 case "command":
                     Bukkit.broadcast(Component.text("Befehl ausführen: " + actionValue));
                     break;
+
                 default:
                     Bukkit.broadcast(Component.text("Unbekannte Regel: " + actionValue));
         

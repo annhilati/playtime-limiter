@@ -72,6 +72,8 @@ public class PlaytimeTimer implements Listener {
         UUID uuid = event.getUniqueId();
         FileConfiguration config = plugin.getConfig();
 
+        Bukkit.broadcast(Component.text(Bukkit.getPlayer(uuid).getName() + " wants to join"));
+
         // Falls nicht in timerData vorhanden
         if (!playerData.isSet(uuid.toString())) {
             String defaultGroup = config.getString("default-group");
@@ -87,7 +89,7 @@ public class PlaytimeTimer implements Listener {
         String mode = playerData.getString(uuid + ".mode");
         boolean restrict = playerData.getBoolean(uuid + ".restrict");
         
-        if (time <= 0 && mode == "bypass") {
+        if (time <= 0 && mode != "bypass") {
             event.disallow(
                 AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
                 Component.text("§cZeit abgelaufen!")
