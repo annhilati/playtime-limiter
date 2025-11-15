@@ -45,6 +45,9 @@ public class PlaytimePlaceholder extends PlaceholderExpansion {
 
                 Duration storedTime = Duration.ofSeconds(playtimeTimer.playerData.getInt(uuid + ".time"));
                 Duration elapsedTime = Duration.between(playtimeTimer.latestCheckIns.get(uuid), Instant.now());
+                if (plugin.getPlaytimeTimer().playerData.get(uuid + ".mode") == "paused") {
+                    elapsedTime = Duration.ZERO;
+                }
 
                 Duration resultingTime = storedTime.minus(elapsedTime);
 
