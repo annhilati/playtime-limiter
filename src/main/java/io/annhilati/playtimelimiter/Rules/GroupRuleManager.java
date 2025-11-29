@@ -221,7 +221,7 @@ public class GroupRuleManager {
 
                 case "restrict":
                     Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue));
-                    playerData.set(uuid + ".restrict", Boolean.parseBoolean(actionValue));
+                    playerData.set(uuid + ".restricted", Boolean.parseBoolean(actionValue));
                     if (player != null && Boolean.parseBoolean(actionValue) == true) {
                         player.kick(Component.text("Restriced"));
                     }

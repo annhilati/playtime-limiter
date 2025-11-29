@@ -84,15 +84,15 @@ public class PlaytimeTimer implements Listener {
 
             playerData.set(uuid + ".time", config.getInt("groups." + defaultGroup + ".start-timer"));
             playerData.set(uuid + ".mode", config.getString("groups." + defaultGroup + ".start-mode"));
-            playerData.set(uuid + ".restrict", false);
-            playerData.set(uuid + ".groups", Arrays.asList(defaultGroup));
+            playerData.set(uuid + ".restricted", false);
+            playerData.set(uuid + ".cached-groups", Arrays.asList(defaultGroup));
         }
 
         plugin.getGroupRuleManager().checkRulesFor(uuid);
 
         long time = playerData.getInt(uuid + ".time");
         String mode = playerData.getString(uuid + ".mode");
-        boolean restrict = playerData.getBoolean(uuid + ".restrict");
+        boolean restricted = playerData.getBoolean(uuid + ".restricted");
         
         if (time <= 0 && mode != "bypass") {
             event.disallow(
@@ -100,7 +100,7 @@ public class PlaytimeTimer implements Listener {
                 Component.text("§cZeit abgelaufen!")
             );
         }
-        if (restrict == true) {
+        if (restricted == true) {
              event.disallow(
                 AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
                 Component.text("§cNicht erlaubt (Restricted)!")
@@ -177,10 +177,10 @@ public class PlaytimeTimer implements Listener {
         List<String> permittedGroups = player.getEffectivePermissions().stream().filter(info -> info.getPermission().startsWith("limiter.group.")).filter(PermissionAttachmentInfo::getValue).map(info -> info.getPermission().substring("limiter.group.".length())).collect(Collectors.toList());
         if (permittedGroups.size() == 0) {
             Bukkit.broadcast(Component.text("Liste ist 0 " + config.getString("default-group")));
-            playerData.set(player.getUniqueId() + ".groups", Arrays.asList(config.getString("default-group")));
+            playerData.set(player.getUniqueId() + ".cached-groups", Arrays.asList(config.getString("default-group")));
             savePlayerDataToFile();
             return;
         }
-        playerData.set(player.getUniqueId() + ".groups", permittedGroups);
+        playerData.set(player.getUniqueId() + ".cached-groups", permittedGroups);
     }
 }
