@@ -91,14 +91,17 @@ public class GroupRuleManager {
             String groupName = group.getKey();
             Bukkit.broadcast(Component.text("Checking for group " + groupName));
 
-            if (playerData.getString(uuid + ".groups").contains(groupName)) {
+            if (playerData.getString(uuid + ".cached-groups").contains(groupName)) {
 
                 Bukkit.broadcast(Component.text(player.getName() + " has Perm for " + groupName));
 
                 for (GroupRule rule : group.getValue()) {
                     Bukkit.broadcast(Component.text("Checking rule " + rule.getName()));
 
-                    Instant lastCheckUp = Instant.parse(playerData.getString(uuid + ".last-checkup"));
+                    String lastCheckupRaw = playerData.getString(uuid + ".last-checkup");
+                    Instant lastCheckUp;
+                    if (lastCheckupRaw == null || lastCheckupRaw.isBlank()) { lastCheckUp = Instant.now(); } else { lastCheckUp = Instant.parse(lastCheckupRaw); }
+
                     LocalTime ruleTime = rule.getTime();
 
                     Bukkit.broadcast(Component.text(lastCheckUp.toString()));

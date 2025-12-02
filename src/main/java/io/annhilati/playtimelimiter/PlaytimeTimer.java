@@ -132,6 +132,10 @@ public class PlaytimeTimer implements Listener {
     public void checkIn(UUID uuid) {
         plugin.getLogger().info("Check in " + uuid);
         latestCheckIns.put(uuid, Instant.now());
+
+        if (playerData.getInt(uuid + ".time") <= plugin.getConfig().getInt("update-cycle")) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {checkOut(uuid);}, playerData.getInt(uuid + ".time") * 20L + 1L);
+        }
     }
 
     public void checkOut(UUID uuid) {
