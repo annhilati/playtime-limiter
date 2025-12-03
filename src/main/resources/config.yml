@@ -1,5 +1,8 @@
 default-group: default
+# The name of the group that is assigned to all players with no other groups assigned by a permission node. It should be defined in the groups section.
+
 update-cycle: 10
+# The number of seconds between two rule checks (used for other stuff too).
 
 # GROUPS
 #
