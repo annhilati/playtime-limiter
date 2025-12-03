@@ -180,7 +180,7 @@ public class PlaytimeTimer implements Listener {
 
         List<String> permittedGroups = player.getEffectivePermissions().stream().filter(info -> info.getPermission().startsWith("limiter.group.")).filter(PermissionAttachmentInfo::getValue).map(info -> info.getPermission().substring("limiter.group.".length())).collect(Collectors.toList());
         if (permittedGroups.size() == 0) {
-            Bukkit.broadcast(Component.text("Liste ist 0 " + config.getString("default-group")));
+            // Bukkit.broadcast(Component.text("Liste ist 0 " + config.getString("default-group"))); // DEBUG
             playerData.set(player.getUniqueId() + ".cached-groups", Arrays.asList(config.getString("default-group")));
             savePlayerDataToFile();
             return;
