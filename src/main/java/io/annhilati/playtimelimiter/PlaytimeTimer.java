@@ -130,7 +130,7 @@ public class PlaytimeTimer implements Listener {
     }
 
     public void checkIn(UUID uuid) {
-        plugin.getLogger().info("Check in " + uuid);
+        // plugin.getLogger().info("Check in " + uuid); // DEBUG
         latestCheckIns.put(uuid, Instant.now());
 
         if (playerData.getInt(uuid + ".time") <= plugin.getConfig().getInt("update-cycle")) {
@@ -139,7 +139,7 @@ public class PlaytimeTimer implements Listener {
     }
 
     public void checkOut(UUID uuid) {
-        plugin.getLogger().info("Check out " + uuid);
+        // plugin.getLogger().info("Check out " + uuid); // DEBUG
         Instant checkIn = latestCheckIns.get(uuid);
         if (checkIn == null)
             return; // Null-Safe

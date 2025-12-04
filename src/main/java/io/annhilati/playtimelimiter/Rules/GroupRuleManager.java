@@ -2,6 +2,7 @@ package io.annhilati.playtimelimiter.Rules;
 
 import io.annhilati.playtimelimiter.PlaytimeLimiter;
 import io.annhilati.playtimelimiter.PlaytimeTimer;
+import io.annhilati.playtimelimiter.Utils.CronCounter;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 
 import org.bukkit.entity.Player;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -51,7 +51,6 @@ public class GroupRuleManager {
             for (String ruleName : rulesSection.getKeys(false)) {
 
                 String timeString = rulesSection.getString(ruleName + ".when.time");
-                LocalTime time = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("H:mm"));
 
                 ConfigurationSection actionSection = rulesSection.getConfigurationSection(ruleName + ".action");
                 List<GroupRuleAction> actions = new ArrayList<>();
@@ -61,7 +60,7 @@ public class GroupRuleManager {
                     actions.add(new GroupRuleAction(actionType, actionValue));
                 }
 
-                rules.add(new GroupRule(ruleName, time, actions));
+                rules.add(new GroupRule(ruleName, timeString, actions));
 
             }
 
@@ -98,11 +97,11 @@ public class GroupRuleManager {
                     Instant lastCheckUp;
                     if (lastCheckupRaw == null || lastCheckupRaw.isBlank()) { lastCheckUp = Instant.now(); } else { lastCheckUp = Instant.parse(lastCheckupRaw); }
 
-                    LocalTime ruleTime = rule.getTime();
+                    String cronjob = rule.getCronjob();
 
                     // Bukkit.broadcast(Component.text(lastCheckUp.toString())); // DEBUG 
                     // Bukkit.broadcast(Component.text(now.toString())); // DEBUG 
-                    long occuranceses = countOccurrences(lastCheckUp, now, ruleTime);
+                    long occuranceses = CronCounter.countOccurrences(lastCheckUp, now, cronjob);
 
                     // Bukkit.broadcast(Component.text("Occurances: " + occuranceses)); // DEBUG 
 
@@ -134,46 +133,46 @@ public class GroupRuleManager {
         }
     }
                 
-    public int countOccurrences(Instant from, Instant to, LocalTime time) {
-        // Grundsätzlich dürfte es keine Dopplung geben, da time schon automatisch 0 Sekunden und Millisekunden hat und dadruch als LocalDateTime auch ziemlich exakt ist
+    // public int countOccurrences(Instant from, Instant to, LocalTime time) {
+    //     // Grundsätzlich dürfte es keine Dopplung geben, da time schon automatisch 0 Sekunden und Millisekunden hat und dadruch als LocalDateTime auch ziemlich exakt ist
      
-        ZoneId zone = ZoneId.systemDefault();
-        ZonedDateTime startDateTime = from.atZone(zone);
-        ZonedDateTime endDateTime = to.atZone(zone);
+    //     ZoneId zone = ZoneId.systemDefault();
+    //     ZonedDateTime startDateTime = from.atZone(zone);
+    //     ZonedDateTime endDateTime = to.atZone(zone);
 
-        ZonedDateTime onStartDayOccurence = time.atDate(startDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
+    //     ZonedDateTime onStartDayOccurence = time.atDate(startDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
 
-        ZonedDateTime firstOccurrence = null;
-        if (onStartDayOccurence.isBefore(startDateTime)) {
-            firstOccurrence = onStartDayOccurence.plusDays(1);
-        } else {
-            firstOccurrence = onStartDayOccurence;
-        }
+    //     ZonedDateTime firstOccurrence = null;
+    //     if (onStartDayOccurence.isBefore(startDateTime)) {
+    //         firstOccurrence = onStartDayOccurence.plusDays(1);
+    //     } else {
+    //         firstOccurrence = onStartDayOccurence;
+    //     }
 
-        ZonedDateTime onEndDayOccurence = time.atDate(endDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
+    //     ZonedDateTime onEndDayOccurence = time.atDate(endDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
 
-        ZonedDateTime lastOccurrence = null;
-        if (onEndDayOccurence.isAfter(endDateTime)) {
-            lastOccurrence = onEndDayOccurence.minusDays(1);
-        } else {
-            lastOccurrence = onEndDayOccurence;
-        }
+    //     ZonedDateTime lastOccurrence = null;
+    //     if (onEndDayOccurence.isAfter(endDateTime)) {
+    //         lastOccurrence = onEndDayOccurence.minusDays(1);
+    //     } else {
+    //         lastOccurrence = onEndDayOccurence;
+    //     }
 
-        // Bukkit.broadcast(Component.text(firstOccurrence.toString())); // DEBUG
-        // Bukkit.broadcast(Component.text(lastOccurrence.toString())); // DEBUG
+    //     // Bukkit.broadcast(Component.text(firstOccurrence.toString())); // DEBUG
+    //     // Bukkit.broadcast(Component.text(lastOccurrence.toString())); // DEBUG
 
-        if (lastOccurrence.isBefore(firstOccurrence)) {
-            return 0;
-        } else if (lastOccurrence.isEqual(firstOccurrence)) {
-            return 1;
-        } else {
-            long daysBetween = Duration.between(firstOccurrence,
-                    lastOccurrence).toDays();
+    //     if (lastOccurrence.isBefore(firstOccurrence)) {
+    //         return 0;
+    //     } else if (lastOccurrence.isEqual(firstOccurrence)) {
+    //         return 1;
+    //     } else {
+    //         long daysBetween = Duration.between(firstOccurrence,
+    //                 lastOccurrence).toDays();
 
-            // Wenn negative Zahl, dann keine Vorkommen
-            return (int) daysBetween + 1;
-        }
-    }
+    //         // Wenn negative Zahl, dann keine Vorkommen
+    //         return (int) daysBetween + 1;
+    //     }
+    // }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
     // │                                        Apply Rule                                        │
@@ -190,7 +189,7 @@ public class GroupRuleManager {
             String actionType = action.getType();
             String actionValue = action.getValue();
         
-            // Bukkit.broadcast(Component.text(actionType)); // DEBUG
+            Bukkit.broadcast(Component.text(actionType + actionValue)); // DEBUG
     
             switch (actionType) {
         
@@ -204,6 +203,7 @@ public class GroupRuleManager {
                     } else {
                         playerData.set(uuid + ".time", Long.parseLong(actionValue));
                     }
+                    break;
         
                 case "changetimer":
                     // Bukkit.broadcast(Component.text("Timer für " + uuid + "ändern um: " + actionValue)); // DEBUG
@@ -217,6 +217,7 @@ public class GroupRuleManager {
                     } else {
                         playerData.set(uuid + ".time", oldTime + Long.parseLong(actionValue));
                     }
+                    break;
 
                 case "restrict":
                     // Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue)); // DEBUG
@@ -224,13 +225,15 @@ public class GroupRuleManager {
                     if (player != null && Boolean.parseBoolean(actionValue) == true) {
                         player.kick(Component.text("Restriced"));
                     }
+                    break;
 
-                case "command":
+                case "execute":
                     // Bukkit.broadcast(Component.text("Befehl ausführen: " + actionValue)); // DEBUG
                     Bukkit.dispatchCommand(player, actionValue);
+                    break;
 
                 default:
-                    Bukkit.broadcast(Component.text("Unbekannte Regel: " + actionValue));
+                    Bukkit.broadcast(Component.text("Unbekannte Aktion: " + actionType));
         
             }
         

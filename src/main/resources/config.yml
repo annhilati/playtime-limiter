@@ -29,7 +29,7 @@ groups:
       rule:
       # This is a rule. Its name can be chosen freely.
         when:
-          time: '03:00'
+          time: '18:07'
           # A clock time in the format "hh:mm"
         # time: 0 1 * * *
           # A cronjob expression (see https://crontab.cronhub.io/)
