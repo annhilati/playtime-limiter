@@ -83,10 +83,7 @@ public class GroupRuleManager {
 
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
         PlaytimeTimer playtimeTimer = plugin.getPlaytimeTimer();
-
-        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-        // Bukkit.broadcast(Component.text("Checking rules for " + player.getName())); // DEBUG
-
+        
         for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
             String groupName = group.getKey();
             // Bukkit.broadcast(Component.text("Checking for group " + groupName)); // DEBUG
