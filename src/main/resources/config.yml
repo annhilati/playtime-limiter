@@ -1,33 +1,34 @@
+# __________.__                  __  .__               .____    .__        .__  __                
+# \______   \  | _____  ___.__._/  |_|__| _____   ____ |    |   |__| _____ |__|/  |_  ___________ 
+#  |     ___/  | \__  \<   |  |\   __\  |/     \_/ __ \|    |   |  |/     \|  \   __\/ __ \_  __ \
+#  |    |   |  |__/ __ \\___  | |  | |  |  Y Y  \  ___/|    |___|  |  Y Y  \  ||  | \  ___/|  | \/
+#  |____|   |____(____  / ____| |__| |__|__|_|  /\___  >_______ \__|__|_|  /__||__|  \___  >__|   
+#                     \/\/                    \/     \/        \/        \/              \/       
+
+# THE PLUGIN DOES NOT EXPLICITELY REPORT FAULTY CONFIGURATION. IF SOMETHING ISN'T WORKING, SEEK SUPPORT.
+
 default-group: default
 # The name of the group that is assigned to all players with no other groups assigned by a permission node. It should be defined in the groups section.
+
+groups:
+# Groups are used to apply certain behaviors to specific players.
+# Groups are assigned by a permission 'limiter.group.{groupname}' whereby {groupname} refers to a key in this groups section.
+
+  default: # This a group. Its name can be chosen freely. There can be multiple groups.
+    start-timer: 3600 # The number of seconds new joining players of the group start with.
+    start-mode: ticking # The timer mode new joining players of the group start with. One of "ticking", "paused" and "bypass"
+    rules:
+      rule_1: # This is a rule. Its name can be chosen freely. There can be mutliple rules per group.
+        when:
+          time: '03:00' # A clock time in the format "hh:mm"
+# TODO    time: 0 1 * * * # A cronjob expression (see https://crontab.cronhub.io/)
+        # restrict: false # 
+        action:
+          changetimer: 3600 # Number of seconds that get added to the players timer
 
 update-cycle: 10
 # The number of seconds between two rule checks (used for other stuff too).
 
-# GROUPS
-#
-# Groups are used to apply certain behaviors to specific players.
-# Groups have rule sets, whereby rules in these rule sets basically make changes to the data of the players in the group at certain times.
-# Groups are assigned by a permission 'limiter.group.{groupname}' whereby {groupname} refers to a key in this groups section.
-groups:
-  default:
-    start-timer: 1000000
-    start-mode: ticking
-    rules:
-      daily:
-        when:
-          time: '0:00'
-        action:
-          changetimer: '5:00'
-      night:
-        when:
-          time: '21:00'
-        action:
-          restrict: deny
-      morning:
-        when:
-          time: '7:00'
-        action:
-          restrict: allow
-    on-expiration:
-      command: tellraw "Time's up!"
+
+# when -> condition
+# condition & action: dict -> list

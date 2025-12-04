@@ -74,5 +74,10 @@
             <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.cronutils</groupId>
+            <artifactId>cron-utils</artifactId>
+            <version>9.2.0</version>
+        </dependency>
     </dependencies>
 </project>
