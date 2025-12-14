@@ -40,7 +40,7 @@ groups:
         # execute: say It's 3 o' clock
           # Doesn't support placeholders 
 
-update-cycle: 10
+update-cycle: 30
 # The number of seconds between two rule checks (used for other stuff too).
 
 

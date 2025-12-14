@@ -15,15 +15,17 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 public class LimiterCommand implements CommandExecutor {
 
     private final PlaytimeLimiter plugin;
+    private final FileConfiguration messageConfig;
 
     public LimiterCommand(PlaytimeLimiter plugin) {
         this.plugin = plugin;
+        this.messageConfig = plugin.getMessageConfig();
     }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
-        commandSender.sendMessage("Angekommen");
+        commandSender.sendMessage("Angekommen"); // DEBUG
 
         FileConfiguration config = plugin.getConfig();
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
@@ -45,8 +47,14 @@ public class LimiterCommand implements CommandExecutor {
         // ╰──────────────────────────────────────────────────────────────────────────────────────────╯
 
         if (!commandSender.hasPermission("limiter.admin")) {
-            commandSender.sendMessage("Du hast keine Berechtigung, diesen Befehl auszuführen.");
+            commandSender.sendMessage(messageConfig.getString("command.missing-permission"));
             return false;
+        }
+
+        if (args.length >= 2 && args[0].equalsIgnoreCase("reload")) {
+            plugin.reloadConfig();
+            commandSender.sendMessage(messageConfig.getString("command.reload.success"));
+            return true;
         }
 
         playtimeTimer.checkOut(uuid);
@@ -71,10 +79,10 @@ public class LimiterCommand implements CommandExecutor {
                 playerData.set(uuid + ".mode", "bypass");
                 
             } else {
-
-                return false;
                 
             }
+
+            commandSender.sendMessage(messageConfig.getString("command.mode.success"));
 
         }
 
@@ -85,6 +93,8 @@ public class LimiterCommand implements CommandExecutor {
             }
         
             playerData.set(uuid + ".time", Long.parseLong(args[1]));
+
+            commandSender.sendMessage(messageConfig.getString("command.settimer.success"));
 
         }
 
@@ -114,6 +124,8 @@ public class LimiterCommand implements CommandExecutor {
 
             playerData.set(uuid + ".time", highest);
 
+            commandSender.sendMessage(messageConfig.getString("command.resettimer.success"));
+
         }
 
         playtimeTimer.savePlayerDataToFile();
@@ -121,6 +133,6 @@ public class LimiterCommand implements CommandExecutor {
             playtimeTimer.checkIn(uuid);
         }
 
-        return true;
+        return true; // obligatorisch
     }
 }

@@ -25,7 +25,7 @@ public class LimiterCommandCompletion implements TabCompleter {
 
         // Subcommands
         if (args.length == 1) {
-            List<String> subcommands = Arrays.asList("settimer", "mode", "resettimer");
+            List<String> subcommands = Arrays.asList("settimer", "mode", "resettimer", "reload");
 
             for (String s : subcommands) {
                 if (s.toLowerCase().startsWith(args[0].toLowerCase())) {

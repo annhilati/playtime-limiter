@@ -1,0 +1,23 @@
+command:
+  prefix: ""
+  missing-permission: "You don't have permission to use this command."
+  reload:
+    success: ""
+    failure: ""
+  mode:
+    success: "Timer mode of {player} was set to {mode}."
+  resettimer:
+    sucess: "Timer for {player} reset to {time}"
+  settimer:
+    sucess: "Timer for {player} set to {time}"
+  changetimer:
+    sucess: "{timedelta} added to {player}'s timer."
+
+notification:
+  settimer: ""
+  changetimer: ""
+  mode: ""
+
+disconnects:
+  restricted: ""
+  expiration: ""

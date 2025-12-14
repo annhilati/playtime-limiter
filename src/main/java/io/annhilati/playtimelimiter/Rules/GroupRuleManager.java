@@ -121,6 +121,8 @@ public class GroupRuleManager {
     
     public void checkRules() {
 
+        plugin.getLogger().info("Checking Rules for players");
+
         parseRulesFromConfig();
         
         // Bukkit.broadcast(Component.text("Rules checking")); // DEBUG
@@ -132,47 +134,6 @@ public class GroupRuleManager {
 
         }
     }
-                
-    // public int countOccurrences(Instant from, Instant to, LocalTime time) {
-    //     // Grundsätzlich dürfte es keine Dopplung geben, da time schon automatisch 0 Sekunden und Millisekunden hat und dadruch als LocalDateTime auch ziemlich exakt ist
-     
-    //     ZoneId zone = ZoneId.systemDefault();
-    //     ZonedDateTime startDateTime = from.atZone(zone);
-    //     ZonedDateTime endDateTime = to.atZone(zone);
-
-    //     ZonedDateTime onStartDayOccurence = time.atDate(startDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
-
-    //     ZonedDateTime firstOccurrence = null;
-    //     if (onStartDayOccurence.isBefore(startDateTime)) {
-    //         firstOccurrence = onStartDayOccurence.plusDays(1);
-    //     } else {
-    //         firstOccurrence = onStartDayOccurence;
-    //     }
-
-    //     ZonedDateTime onEndDayOccurence = time.atDate(endDateTime.toLocalDate()).atZone(zone); // time ist bereits sekunden clean
-
-    //     ZonedDateTime lastOccurrence = null;
-    //     if (onEndDayOccurence.isAfter(endDateTime)) {
-    //         lastOccurrence = onEndDayOccurence.minusDays(1);
-    //     } else {
-    //         lastOccurrence = onEndDayOccurence;
-    //     }
-
-    //     // Bukkit.broadcast(Component.text(firstOccurrence.toString())); // DEBUG
-    //     // Bukkit.broadcast(Component.text(lastOccurrence.toString())); // DEBUG
-
-    //     if (lastOccurrence.isBefore(firstOccurrence)) {
-    //         return 0;
-    //     } else if (lastOccurrence.isEqual(firstOccurrence)) {
-    //         return 1;
-    //     } else {
-    //         long daysBetween = Duration.between(firstOccurrence,
-    //                 lastOccurrence).toDays();
-
-    //         // Wenn negative Zahl, dann keine Vorkommen
-    //         return (int) daysBetween + 1;
-    //     }
-    // }
 
     // ╭──────────────────────────────────────────────────────────────────────────────────────────╮
     // │                                        Apply Rule                                        │
@@ -189,7 +150,7 @@ public class GroupRuleManager {
             String actionType = action.getType();
             String actionValue = action.getValue();
         
-            Bukkit.broadcast(Component.text(actionType + actionValue)); // DEBUG
+            // Bukkit.broadcast(Component.text(actionType + actionValue)); // DEBUG
     
             switch (actionType) {
         
