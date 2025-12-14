@@ -2,8 +2,7 @@ command:
   prefix: ""
   missing-permission: "You don't have permission to use this command."
   reload:
-    success: ""
-    failure: ""
+    success: "Config successfully reloaded"
   mode:
     success: "Timer mode of {player} was set to {mode}."
   resettimer:
@@ -14,10 +13,10 @@ command:
     sucess: "{timedelta} added to {player}'s timer."
 
 notification:
-  settimer: ""
-  changetimer: ""
-  mode: ""
+  settimer: "Your playtime was set to {time}."
+  changetimer: "Your playtime was changed by {timedelta}."
+  mode: "Your timer mode was set to {mode}."
 
 disconnects:
-  restricted: ""
-  expiration: ""
+  restricted: "You are restricted for playing for now."
+  expired: "You are out of playtime for now."

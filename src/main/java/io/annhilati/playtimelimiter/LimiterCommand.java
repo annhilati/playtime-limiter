@@ -12,6 +12,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
+import net.kyori.adventure.text.Component;
+
 public class LimiterCommand implements CommandExecutor {
 
     private final PlaytimeLimiter plugin;
@@ -58,6 +60,31 @@ public class LimiterCommand implements CommandExecutor {
         }
 
         playtimeTimer.checkOut(uuid);
+
+        if (args.length >= 2 && args[0].equalsIgnoreCase("restrict")) {
+
+            if (args.length >= 3) {
+                uuid = Bukkit.getOfflinePlayer(args[2]).getUniqueId();
+            }
+
+            if (args[1].equalsIgnoreCase("true")) {
+
+                playerData.set(uuid + ".restricted", true);
+                if (Bukkit.getPlayer(uuid) != null) {
+                    Bukkit.getPlayer(uuid).kick(Component.text(messageConfig.getString("disconnects.restricted")));
+                }
+
+            } else if (args[1].equalsIgnoreCase("false")) {
+
+                playerData.set(uuid + ".restricted", false);
+
+            } else {
+
+            }
+
+            commandSender.sendMessage(messageConfig.getString("command.mode.success"));
+
+        }
 
         if (args.length >= 2 && args[0].equalsIgnoreCase("mode")) {
 

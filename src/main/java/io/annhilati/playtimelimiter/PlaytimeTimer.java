@@ -30,9 +30,11 @@ public class PlaytimeTimer implements Listener {
     private final PlaytimeLimiter plugin;
 
     public final Map<UUID, Instant> latestCheckIns = new HashMap<>();
+    private final FileConfiguration messageConfig;
 
     public PlaytimeTimer(PlaytimeLimiter plugin) {
         this.plugin = plugin;
+        this.messageConfig = plugin.getMessageConfig();
 
         createPlayerDataFileDefault();
 
@@ -97,13 +99,13 @@ public class PlaytimeTimer implements Listener {
         if (time <= 0 && mode != "bypass") {
             event.disallow(
                 AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                Component.text("§cZeit abgelaufen!")
+                Component.text(messageConfig.getString("disconnects.expired"))
             );
         }
         if (restricted == true) {
              event.disallow(
                 AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                Component.text("§cNicht erlaubt (Restricted)!")
+                Component.text(messageConfig.getString("disconnects.restricted"))
             );
         }
     }
