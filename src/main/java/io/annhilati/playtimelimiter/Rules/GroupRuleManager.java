@@ -21,9 +21,11 @@ public class GroupRuleManager {
     
     private final PlaytimeLimiter plugin;
     private final Map<String, List<GroupRule>> groupRules = new HashMap<>();
+    private final FileConfiguration messageConfig;
     
     public GroupRuleManager(PlaytimeLimiter plugin) {
         this.plugin = plugin;
+        this.messageConfig = plugin.getMessageConfig();
 
         FileConfiguration config = plugin.getConfig();
 
@@ -77,6 +79,8 @@ public class GroupRuleManager {
      */
     public void checkRulesFor(UUID uuid) {
 
+        plugin.getLogger().info("Checking rules for " + uuid); // DEBUG
+
         Instant now = Instant.now();
 
         FileConfiguration playerData = plugin.getPlaytimeTimer().playerData;
@@ -84,14 +88,16 @@ public class GroupRuleManager {
         
         for (Map.Entry<String, List<GroupRule>> group : groupRules.entrySet()) {
             String groupName = group.getKey();
-            // Bukkit.broadcast(Component.text("Checking for group " + groupName)); // DEBUG
+
+            plugin.getLogger().info("Checking them for group " + groupName); // DEBUG
 
             if (playerData.getString(uuid + ".cached-groups").contains(groupName)) {
 
-                // Bukkit.broadcast(Component.text(player.getName() + " has Perm for " + groupName)); // DEBUG
+                plugin.getLogger().info("They have Perm for " + groupName); // DEBUG
 
                 for (GroupRule rule : group.getValue()) {
-                    // Bukkit.broadcast(Component.text("Checking rule " + rule.getName())); // DEBUG
+
+                    plugin.getLogger().info("Checking rule " + rule.getName() + " for them"); // DEBUG
 
                     String lastCheckupRaw = playerData.getString(uuid + ".last-checkup");
                     Instant lastCheckUp;
@@ -103,7 +109,7 @@ public class GroupRuleManager {
                     // Bukkit.broadcast(Component.text(now.toString())); // DEBUG 
                     long occuranceses = CronCounter.countOccurrences(lastCheckUp, now, cronjob);
 
-                    // Bukkit.broadcast(Component.text("Occurances: " + occuranceses)); // DEBUG 
+                    plugin.getLogger().info("The rule aplies: " + occuranceses); // DEBUG 
 
                     for (int i = 0; i < occuranceses; i++) {
                         applyRule(rule, uuid);
@@ -184,7 +190,10 @@ public class GroupRuleManager {
                     // Bukkit.broadcast(Component.text("Restrict für " + uuid + ": " + actionValue)); // DEBUG
                     playerData.set(uuid + ".restricted", Boolean.parseBoolean(actionValue));
                     if (player != null && Boolean.parseBoolean(actionValue) == true) {
-                        player.kick(Component.text("Restriced"));
+
+                        plugin.getLogger().info("trying to kick");
+                        
+                        player.kick(Component.text(messageConfig.getString("disconnects.restricted")));
                     }
                     break;
 
@@ -195,10 +204,10 @@ public class GroupRuleManager {
 
                 default:
                     Bukkit.broadcast(Component.text("Unbekannte Aktion: " + actionType));
+
+                playtimeTimer.savePlayerDataToFile();
         
             }
-        
         }
-        
     }
 }

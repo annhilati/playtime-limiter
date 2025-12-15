@@ -78,7 +78,7 @@ public class PlaytimeTimer implements Listener {
         UUID uuid = event.getUniqueId();
         FileConfiguration config = plugin.getConfig();
 
-        Bukkit.broadcast(Component.text(event.getName() + " wants to join"));
+        // Bukkit.broadcast(Component.text(event.getName() + " wants to join")); // DEBUG
 
         // Falls nicht in timerData vorhanden
         if (!playerData.isSet(uuid.toString())) {
